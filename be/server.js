@@ -64,6 +64,23 @@ function qs(url) {
   return { pathname: u.pathname, query: out };
 }
 
+const API_CACHE = new Map();
+const API_CACHE_TTL = 20_000;
+
+function apiCacheKey(pathname, query) {
+  return `${pathname}|${query.from || ''}|${query.to || ''}|${query.kho || ''}|${query.phan_khuc || ''}|${query.phan_nhom || ''}|${query.key || ''}`;
+}
+
+async function cachedJson(pathname, query, fn) {
+  const key = apiCacheKey(pathname, query);
+  const hit = API_CACHE.get(key);
+  if (hit && Date.now() - hit.at < API_CACHE_TTL) return hit.value;
+  const value = await fn();
+  API_CACHE.set(key, { at: Date.now(), value });
+  if (API_CACHE.size > 80) API_CACHE.delete(API_CACHE.keys().next().value);
+  return value;
+}
+
 async function handleApi(req, res, pathname, query) {
   if (pathname === '/api/me') {
     return send(res, req, 200, {
@@ -73,29 +90,19 @@ async function handleApi(req, res, pathname, query) {
     });
   }
 
-  if (pathname === '/api/overview') {
-    return send(res, req, 200, await queries.overview(query));
-  }
-  if (pathname === '/api/san-pham') {
-    return send(res, req, 200, await queries.sanPham(query));
-  }
-  if (pathname === '/api/ton-kho') {
-    return send(res, req, 200, await queries.tonKho(query));
-  }
-  if (pathname === '/api/hang-dang-ve') {
-    return send(res, req, 200, await queries.hangDangVe(query));
-  }
-  if (pathname === '/api/hanh-dong') {
-    return send(res, req, 200, await queries.hanhDong(query));
-  }
-  if (pathname === '/api/spu-check') {
-    return send(res, req, 200, await queries.spuCheck(query));
-  }
-  if (pathname === '/api/filters') {
-    return send(res, req, 200, await queries.filterOptions());
-  }
-
-  return send(res, req, 404, { error: 'not found' });
+  const map = {
+    '/api/overview': () => queries.overview(query),
+    '/api/san-pham': () => queries.sanPham(query),
+    '/api/ton-kho': () => queries.tonKho(query),
+    '/api/hang-dang-ve': () => queries.hangDangVe(query),
+    '/api/hanh-dong': () => queries.hanhDong(query),
+    '/api/spu-check': () => queries.spuCheck(query),
+    '/api/filters': () => queries.filterOptions(),
+  };
+  const fn = map[pathname];
+  if (!fn) return send(res, req, 404, { error: 'not found' });
+  const body = pathname === '/api/spu-check' ? await fn() : await cachedJson(pathname, query, fn);
+  return send(res, req, 200, body, { 'Cache-Control': 'private, max-age=15' });
 }
 
 async function handleAuth(req, res, pathname, query) {

@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { Client } = require('pg');
+const { Pool } = require('pg');
 
 function loadEnv() {
   const candidates = [
@@ -22,16 +22,25 @@ const ENV = loadEnv();
 const SCHEMA = ENV.DB_SCHEMA || 'global';
 const fq = (t) => `"${SCHEMA}"."${t}"`;
 
+const pool = new Pool({
+  connectionString: ENV.SUPABASE_DB_URL,
+  ssl: { rejectUnauthorized: false },
+  max: Number(ENV.DB_POOL_MAX || 8),
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 8_000,
+  options: '-c statement_timeout=20000',
+});
+
+function dbQuery(sql, params) {
+  return pool.query(sql, params);
+}
+
 async function withDb(fn) {
-  const c = new Client({
-    connectionString: ENV.SUPABASE_DB_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-  await c.connect();
+  const c = await pool.connect();
   try {
     return await fn(c);
   } finally {
-    await c.end();
+    c.release();
   }
 }
 
@@ -46,4 +55,4 @@ function khoFilter(q, alias = 'f') {
   return { sql: ` AND ${alias}.kho = $K`, params: [q.kho], key: 'kho' };
 }
 
-module.exports = { ENV, SCHEMA, fq, withDb, parseRange, khoFilter };
+module.exports = { ENV, SCHEMA, fq, pool, dbQuery, withDb, parseRange, khoFilter };
