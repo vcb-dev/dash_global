@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { api } from '../lib/api';
+import { memo, useCallback } from 'react';
+import { useApi } from '../lib/useApi';
 import { fmt } from '../lib/format';
 import { bar, doughnut } from '../lib/charts';
 import ChartCanvas from '../components/ChartCanvas';
@@ -12,20 +12,8 @@ function etaClass(flag) {
   return 'eta-ch';
 }
 
-export default function HangDangVe({ filters }) {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    let live = true;
-    setError('');
-    api('/api/hang-dang-ve', filters)
-      .then((d) => live && setData(d))
-      .catch((e) => live && setError(String(e.message || e)));
-    return () => {
-      live = false;
-    };
-  }, [filters]);
+function HangDangVe({ filters }) {
+  const { data, error, loading } = useApi('/api/hang-dang-ve', filters);
 
   const drawEta = useCallback(
     (canvas) => {
@@ -51,12 +39,12 @@ export default function HangDangVe({ filters }) {
     [data]
   );
 
-  if (error) return <div className="error">{error}</div>;
+  if (error && !data) return <div className="error">{error}</div>;
   if (!data) return <div className="loading">Đang tải…</div>;
   const k = data.kpi;
 
   return (
-    <>
+    <div className={loading ? 'is-loading' : ''}>
       <div className="kpi-row">
         <Kpi label="Số PO" value={fmt.num(k.so_po)} />
         <Kpi label="Hàng đang về" value={fmt.num(k.dang_ve)} tone="ok" />
@@ -94,6 +82,8 @@ export default function HangDangVe({ filters }) {
           ]}
         />
       </div>
-    </>
+    </div>
   );
 }
+
+export default memo(HangDangVe);

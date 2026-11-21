@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, getJson } from './lib/api';
 import HangDangVe from './pages/HangDangVe';
 import HanhDong from './pages/HanhDong';
@@ -60,24 +60,35 @@ export default function App() {
 
   const filters = useMemo(() => applied, [applied]);
   const meta = PAGES.find((p) => p.id === page) || {};
+  const debounceRef = useRef(null);
+
+  function applyNow(next) {
+    clearTimeout(debounceRef.current);
+    setApplied(next);
+  }
+
+  function applySoon(next) {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setApplied(next), 180);
+  }
 
   function apply() {
-    setApplied({ from, to, kho, phan_khuc: phanKhuc, phan_nhom: phanNhom });
+    applyNow({ from, to, kho, phan_khuc: phanKhuc, phan_nhom: phanNhom });
   }
 
   function setKhoNow(next) {
     setKho(next);
-    setApplied({ from, to, kho: next, phan_khuc: phanKhuc, phan_nhom: phanNhom });
+    applySoon({ from, to, kho: next, phan_khuc: phanKhuc, phan_nhom: phanNhom });
   }
 
   function setPkNow(next) {
     setPhanKhuc(next);
-    setApplied({ from, to, kho, phan_khuc: next, phan_nhom: phanNhom });
+    applySoon({ from, to, kho, phan_khuc: next, phan_nhom: phanNhom });
   }
 
   function setNhomNow(next) {
     setPhanNhom(next);
-    setApplied({ from, to, kho, phan_khuc: phanKhuc, phan_nhom: next });
+    applySoon({ from, to, kho, phan_khuc: phanKhuc, phan_nhom: next });
   }
 
   return (

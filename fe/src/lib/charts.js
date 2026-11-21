@@ -96,9 +96,10 @@ export function bar(canvas, labels, values, opts = {}) {
         },
       ],
     },
-    options: {
-      indexAxis: horizontal ? 'y' : 'x',
-      responsive: true,
+      options: {
+        animation: false,
+        indexAxis: horizontal ? 'y' : 'x',
+        responsive: true,
       maintainAspectRatio: false,
       layout: { padding: { top: 22, right: horizontal ? 56 : 8, left: horizontal ? 8 : 4, bottom: 4 } },
       plugins: basePlugins({
@@ -202,6 +203,7 @@ export function barLineShare(canvas, labels, values, sharePcts) {
       ],
     },
     options: {
+      animation: false,
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
@@ -278,6 +280,7 @@ export function doughnut(canvas, labels, values, colors, opts = {}) {
       ],
     },
     options: {
+      animation: false,
       responsive: true,
       maintainAspectRatio: false,
       cutout: '58%',
@@ -382,6 +385,7 @@ export function line(canvas, labels, values, benchmark) {
     type: 'line',
     data: { labels, datasets },
     options: {
+      animation: false,
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },

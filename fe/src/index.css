@@ -325,6 +325,10 @@ table.data tfoot tr:hover td { background: #e8eef8; }
 .content {
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
+.is-loading {
+  opacity: 0.72;
+  transition: opacity 0.12s ease;
+}
 .kpi .value {
   transition: color 0.2s ease;
 }

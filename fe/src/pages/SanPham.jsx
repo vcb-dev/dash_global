@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { api } from '../lib/api';
+import { memo, useCallback } from 'react';
+import { useApi } from '../lib/useApi';
 import { fmt } from '../lib/format';
 import { barLineShare, doughnut } from '../lib/charts';
 import BadgePk from '../components/BadgePk';
@@ -7,20 +7,8 @@ import ChartCanvas from '../components/ChartCanvas';
 import DataTable from '../components/DataTable';
 import Kpi from '../components/Kpi';
 
-export default function SanPham({ filters }) {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    let live = true;
-    setError('');
-    api('/api/san-pham', filters)
-      .then((d) => live && setData(d))
-      .catch((e) => live && setError(String(e.message || e)));
-    return () => {
-      live = false;
-    };
-  }, [filters]);
+function SanPham({ filters }) {
+  const { data, error, loading } = useApi('/api/san-pham', filters);
 
   const drawPk = useCallback(
     (canvas) => {
@@ -48,11 +36,11 @@ export default function SanPham({ filters }) {
     [data]
   );
 
-  if (error) return <div className="error">{error}</div>;
+  if (error && !data) return <div className="error">{error}</div>;
   if (!data) return <div className="loading">Đang tải…</div>;
 
   return (
-    <>
+    <div className={loading ? 'is-loading' : ''}>
       <div className="kpi-row">
         <Kpi label="⚠ Doanh thu mã trung gian" value={fmt.money(data.warn_dt)} tone="warn" />
       </div>
@@ -81,6 +69,8 @@ export default function SanPham({ filters }) {
           ]}
         />
       </div>
-    </>
+    </div>
   );
 }
+
+export default memo(SanPham);

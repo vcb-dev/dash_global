@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { api } from '../lib/api';
+import { memo } from 'react';
+import { useApi } from '../lib/useApi';
 import { fmt } from '../lib/format';
 import BadgePk from '../components/BadgePk';
 import DataTable from '../components/DataTable';
@@ -38,29 +38,19 @@ function ActionTable({ title, pack }) {
   );
 }
 
-export default function HanhDong({ filters }) {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState('');
+function HanhDong({ filters }) {
+  const { data, error, loading } = useApi('/api/hanh-dong', filters);
 
-  useEffect(() => {
-    let live = true;
-    setError('');
-    api('/api/hanh-dong', filters)
-      .then((d) => live && setData(d))
-      .catch((e) => live && setError(String(e.message || e)));
-    return () => {
-      live = false;
-    };
-  }, [filters]);
-
-  if (error) return <div className="error">{error}</div>;
+  if (error && !data) return <div className="error">{error}</div>;
   if (!data) return <div className="loading">Đang tải…</div>;
 
   return (
-    <>
+    <div className={loading ? 'is-loading' : ''}>
       <ActionTable title="Ưu tiên về hàng / giữ stock (Bán chạy)" pack={data.banChay} />
       <ActionTable title="Xả tồn / cắt đặt (Tồn xấu)" pack={data.tonXau} />
       <ActionTable title="Theo dõi (Bán chậm)" pack={data.banCham} />
-    </>
+    </div>
   );
 }
+
+export default memo(HanhDong);
