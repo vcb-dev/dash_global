@@ -1,12 +1,18 @@
 # dash-global FE
 
-Dashboard tĩnh (HTML/CSS/JS). Gọi API ở folder `be`.
+React + Vite. URL API lấy từ `.env`:
+
+```
+VITE_API_BASE=http://localhost:3847
+```
 
 ```bash
 cd fe
-npm start
+cp .env.example .env
+npm install
+npm run dev
 ```
 
-Mở http://localhost:5173 — BE phải chạy sẵn ở http://localhost:3847.
+http://localhost:5173
 
-Đổi URL API: sửa `js/config.js` (`window.API_BASE`). Deploy Vercel: Root Directory = `fe`, rồi trỏ `API_BASE` sang URL backend.
+Vercel: Root Directory = `fe`, env `VITE_API_BASE` = URL Railway.

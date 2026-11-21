@@ -198,10 +198,10 @@ span.danger { color: var(--danger); font-weight: 600; }
   margin: 0;
 }
 .card + .card { margin-top: 0; }
-#content > .card {
+.content > .card {
   margin-bottom: 12px;
 }
-#content > .card:last-child {
+.content > .card:last-child {
   margin-bottom: 0;
 }
 .card h2 {
@@ -322,19 +322,8 @@ table.data tfoot tr:hover td { background: #e8eef8; }
 }
 .error { color: var(--danger); }
 
-#content {
+.content {
   transition: opacity 0.18s ease, transform 0.18s ease;
-}
-#content.content-fade-out {
-  opacity: 0.35;
-  transform: translateY(4px);
-}
-#content.content-fade-in {
-  opacity: 0;
-  transform: translateY(6px);
-}
-#content.is-loading {
-  pointer-events: none;
 }
 .kpi .value {
   transition: color 0.2s ease;

@@ -5,13 +5,29 @@ const auth = require('./lib/auth');
 const queries = require('./lib/queries');
 
 const PORT = Number(ENV.PORT || 3847);
-const FE_ORIGIN = (ENV.FE_ORIGIN || 'http://localhost:5173').replace(/\/$/, '');
+const FE_ORIGINS = String(ENV.FE_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((s) => s.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+const FE_ORIGIN = FE_ORIGINS[0];
+
+function allowOrigin(origin) {
+  if (!origin) return FE_ORIGIN;
+  if (FE_ORIGINS.includes(origin)) return origin;
+  if (origin === 'http://localhost:5173' || origin === 'http://127.0.0.1:5173') return origin;
+  try {
+    const host = new URL(origin).hostname;
+    if (host.endsWith('.vercel.app')) return origin;
+  } catch {
+    /* ignore */
+  }
+  return FE_ORIGIN;
+}
 
 const GUEST = { email: 'local', name: 'Pancake BI', picture: '' };
 
 function corsHeaders(req) {
-  const origin = req.headers.origin || FE_ORIGIN;
-  const allow = origin === FE_ORIGIN || origin === 'http://localhost:5173' ? origin : FE_ORIGIN;
+  const allow = allowOrigin(req.headers.origin);
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Credentials': 'true',

@@ -1,4 +1,4 @@
-window.fmt = {
+export const fmt = {
   num(n, dig = 0) {
     if (n == null || Number.isNaN(Number(n))) return '—';
     return Number(n).toLocaleString('vi-VN', { maximumFractionDigits: dig, minimumFractionDigits: dig });

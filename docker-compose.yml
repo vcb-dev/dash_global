@@ -1,0 +1,12 @@
+services:
+  be:
+    platform: linux/amd64
+    build: ./be
+    image: vcbdev/dash-global-be:latest
+    env_file:
+      - ./be/.env
+    environment:
+      PORT: "3847"
+    ports:
+      - "3847:3847"
+    restart: unless-stopped
