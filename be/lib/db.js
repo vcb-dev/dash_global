@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { Client } = require(path.join(__dirname, '..', '..', 'node_modules', 'pg'));
+const { Client } = require('pg');
 
 function loadEnv() {
   const candidates = [

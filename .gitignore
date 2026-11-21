@@ -2,13 +2,15 @@
 .env
 .env.*
 !.env.example
-web/.env
-web/.env.*
-!web/.env.example
+be/.env
+be/.env.*
+!be/.env.example
+fe/.env
 
 # dependencies & runtime
 node_modules/
-web/node_modules/
+be/node_modules/
+fe/node_modules/
 tools/node/
 
 # data exports / local caches

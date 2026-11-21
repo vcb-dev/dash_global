@@ -23,21 +23,24 @@
       <p class="muted" id="hint" style="margin-top:16px"></p>
     </div>
   </div>
+  <script src="/js/config.js"></script>
   <script>
     (async () => {
-      const me = await fetch('/api/me').then((r) => r.json());
+      const origin = (window.API_BASE || '').replace(/\/$/, '') || location.origin;
+      const me = await fetch(`${origin}/api/me`, { credentials: 'include' }).then((r) => r.json());
       if (me.user) { location.href = '/'; return; }
       if (me.google) {
         document.getElementById('googleBtn').style.display = 'flex';
-        document.getElementById('googleBtn').onclick = () => { location.href = '/auth/google'; };
+        document.getElementById('googleBtn').onclick = () => { location.href = `${origin}/auth/google`; };
         document.getElementById('hint').textContent = 'Dùng tài khoản Google được cấp quyền.';
       }
       if (me.devLogin) {
         document.getElementById('devBox').style.display = 'block';
         document.getElementById('devBtn').onclick = async () => {
           const email = document.getElementById('devEmail').value;
-          const res = await fetch('/auth/dev-login', {
+          const res = await fetch(`${origin}/auth/dev-login`, {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
           });

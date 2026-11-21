@@ -22,14 +22,19 @@ const PAGES = [
   { id: 'hanh-dong', label: 'Hành động tuần này' },
 ];
 
+function apiOrigin() {
+  const base = (window.API_BASE || '').replace(/\/$/, '');
+  return base || location.origin;
+}
+
 async function api(path) {
-  const u = new URL(path, location.origin);
+  const u = new URL(path, apiOrigin() + '/');
   u.searchParams.set('from', state.from);
   u.searchParams.set('to', state.to);
   if (state.kho && state.kho !== 'All') u.searchParams.set('kho', state.kho);
   if (state.phan_khuc && state.phan_khuc !== 'All') u.searchParams.set('phan_khuc', state.phan_khuc);
   if (state.phan_nhom && state.phan_nhom !== 'All') u.searchParams.set('phan_nhom', state.phan_nhom);
-  const res = await fetch(u);
+  const res = await fetch(u.toString(), { credentials: 'include' });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
@@ -619,7 +624,7 @@ async function render(opts = {}) {
 
 async function boot() {
   try {
-    const me = await fetch('/api/me').then((r) => r.json());
+    const me = await fetch(`${apiOrigin()}/api/me`, { credentials: 'include' }).then((r) => r.json());
     state.user = me.user || { name: 'Pancake BI', email: 'local' };
   } catch (_) {
     state.user = { name: 'Pancake BI', email: 'local' };
