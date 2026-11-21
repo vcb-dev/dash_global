@@ -1,0 +1,262 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "1d45c967e417921c08c0",
+  "position": {
+    "x": 25,
+    "y": 154,
+    "z": 4000,
+    "height": 120,
+    "width": 1870,
+    "tabOrder": 4000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "dim_spu"
+                        }
+                      },
+                      "Property": "spu_key"
+                    }
+                  },
+                  "Function": 2
+                }
+              },
+              "queryRef": "Min(dim_spu.spu_key)",
+              "nativeQueryRef": "Tổng SPU",
+              "displayName": "Tổng SPU"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_doanh_thu"
+                    }
+                  },
+                  "Property": "Doanh thu"
+                }
+              },
+              "queryRef": "fact_doanh_thu.Doanh thu",
+              "nativeQueryRef": "Doanh thu"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_doanh_thu"
+                    }
+                  },
+                  "Property": "Đơn chốt"
+                }
+              },
+              "queryRef": "fact_doanh_thu.Đơn chốt",
+              "nativeQueryRef": "Đơn chốt"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_doanh_thu"
+                    }
+                  },
+                  "Property": "Số lượng bán"
+                }
+              },
+              "queryRef": "fact_doanh_thu.Số lượng bán",
+              "nativeQueryRef": "Số lượng bán"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_doanh_thu"
+                    }
+                  },
+                  "Property": "Giá trị TB/đơn"
+                }
+              },
+              "queryRef": "fact_doanh_thu.Giá trị TB/đơn",
+              "nativeQueryRef": "Giá trị TB/đơn"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "dim_spu"
+                      }
+                    },
+                    "Property": "spu_key"
+                  }
+                },
+                "Function": 2
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "objects": {
+      "outline": [
+        {
+          "properties": {
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "label": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 3,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'''Segoe UI Bold'', wf_segoe-ui_bold, helvetica, arial, sans-serif'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "d7ce83cbde8a2e7d0dec",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_doanh_thu"
+              }
+            },
+            "Property": "Doanh thu"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "dd0cd1f7b475bc033ddc",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_doanh_thu"
+              }
+            },
+            "Property": "Đơn chốt"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "e636e49890e90d50b3e7",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_doanh_thu"
+              }
+            },
+            "Property": "Số lượng bán"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "46a3d060a40286180150",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_doanh_thu"
+              }
+            },
+            "Property": "Giá trị TB/đơn"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "744af396a6ed9040a3ec",
+        "field": {
+          "Aggregation": {
+            "Expression": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dim_spu"
+                  }
+                },
+                "Property": "spu_key"
+              }
+            },
+            "Function": 2
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

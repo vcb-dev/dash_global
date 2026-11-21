@@ -1,0 +1,116 @@
+table dim_date
+	lineageTag: 29fe8a65-3f23-4c0e-8ee7-aaaf3b6ec141
+	dataCategory: Time
+
+	column ngay
+		dataType: dateTime
+		isKey
+		formatString: dd/MM/yyyy
+		lineageTag: 5b91eeb3-e4d1-4f3d-90c1-d0e9abae544d
+		summarizeBy: none
+		sourceColumn: ngay
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column nam
+		dataType: int64
+		formatString: #,0
+		lineageTag: f78c5ee0-4aca-4b92-8188-5af0ecce1e62
+		summarizeBy: none
+		sourceColumn: nam
+
+	column quy
+		dataType: string
+		lineageTag: bc62bf5b-1ca0-42ce-bd9c-7d1f7d569ece
+		summarizeBy: none
+		sourceColumn: quy
+
+	column thang
+		dataType: int64
+		formatString: #,0
+		lineageTag: d779a12f-3a6e-4a4d-8e61-918d4d23c392
+		summarizeBy: none
+		sourceColumn: thang
+
+	column ky_bao_cao
+		dataType: string
+		lineageTag: b70a0ec2-f464-444f-a83d-5c2e4814cd45
+		summarizeBy: none
+		sourceColumn: ky_bao_cao
+
+	column ten_thang
+		dataType: string
+		lineageTag: ca090e1b-36fd-48d8-a9d5-5fe33f27e670
+		summarizeBy: none
+		sourceColumn: ten_thang
+
+	column ngay_trong_thang
+		dataType: int64
+		formatString: #,0
+		lineageTag: 37bd6b3c-df5b-404f-951e-6d75f75474d3
+		summarizeBy: none
+		sourceColumn: ngay_trong_thang
+
+	column so_ngay_thang
+		dataType: int64
+		formatString: #,0
+		lineageTag: 12301370-e886-4f7e-9ceb-efa8b30e03a2
+		summarizeBy: none
+		sourceColumn: so_ngay_thang
+
+	column cuoi_thang
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 64045858-80ff-4d56-922f-7a4d8c692de5
+		summarizeBy: none
+		sourceColumn: cuoi_thang
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column la_cuoi_thang
+		dataType: int64
+		formatString: #,0
+		lineageTag: e33dcd3f-d68f-4f7c-b5c0-e2c31102d7d7
+		summarizeBy: none
+		sourceColumn: la_cuoi_thang
+
+	column thu
+		dataType: string
+		lineageTag: 5b084556-19d1-4f47-b52d-3b0dcbe116a8
+		summarizeBy: none
+		sourceColumn: thu
+
+	column thu_so
+		dataType: int64
+		formatString: #,0
+		lineageTag: 53f5d818-3807-494a-8e11-22ccefe41f64
+		summarizeBy: none
+		sourceColumn: thu_so
+
+	column tuan_iso
+		dataType: int64
+		formatString: #,0
+		lineageTag: b782bb7a-f9f3-4f7a-95fd-085081d92cd5
+		summarizeBy: none
+		sourceColumn: tuan_iso
+
+	column ngay_chot_tuan
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 2d35c176-b364-4c6f-949a-e36c04f7c3c2
+		summarizeBy: none
+		sourceColumn: ngay_chot_tuan
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("aws-0-ap-southeast-1.pooler.supabase.com:5432", "postgres"),
+				    Nguon = Source{[Schema="global_draft", Item="dim_date"]}[Data],
+				    Bo = Nguon,
+				    KieuDuLieu = Table.TransformColumnTypes(Bo, {{"ngay", type date}, {"nam", Int64.Type}, {"quy", type text}, {"thang", Int64.Type}, {"ky_bao_cao", type text}, {"ten_thang", type text}, {"ngay_trong_thang", Int64.Type}, {"so_ngay_thang", Int64.Type}, {"cuoi_thang", type date}, {"la_cuoi_thang", Int64.Type}, {"thu", type text}, {"thu_so", Int64.Type}, {"tuan_iso", Int64.Type}, {"ngay_chot_tuan", type date}})
+				in
+				    KieuDuLieu
+

@@ -1,0 +1,67 @@
+relationship e854b1ec-da81-42c6-9dae-794d4328c687
+	fromColumn: fact_doanh_thu.ngay
+	toColumn: dim_date.ngay
+
+relationship 56383462-d178-4282-aaf1-cf91b830249e
+	fromColumn: fact_doanh_thu.kho
+	toColumn: dim_kho.kho
+
+relationship e773d1f7-0df9-4991-983d-14913b10a498
+	fromColumn: fact_doanh_thu.spu_key
+	toColumn: dim_spu.spu_key
+
+relationship 6c893fea-0fcc-4113-85e0-a2c9494b7867
+	fromColumn: fact_ton_kho.ngay
+	toColumn: dim_date.ngay
+
+relationship 056d7c84-744c-4731-9a1c-db6e746cff96
+	fromColumn: fact_ton_kho.kho
+	toColumn: dim_kho.kho
+
+relationship c43e27d6-9ea2-4872-b05d-18e8e4d04fa9
+	fromColumn: fact_ton_kho.spu_key
+	toColumn: dim_spu.spu_key
+
+relationship 76b5ba67-43f3-459d-b7e7-875e5d1507f8
+	fromColumn: fact_po.spu_key
+	toColumn: dim_spu.spu_key
+
+relationship a9c8b7d6-e5f4-3210-a9c8-b7d6e5f43210
+	fromColumn: day_ton_xau.spu_key
+	toColumn: dim_spu.spu_key
+
+relationship 231b05eb-755b-40fb-8084-ea93ee6e123f
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_spu.ngay_tao_ma
+	toColumn: LocalDateTable_aa873a41-9c44-4a03-a6f4-ed2c8c791fc0.Date
+
+relationship c41e00bf-fd6a-4c05-812c-17018b681589
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_spu.ngay_chot_phan_khuc
+	toColumn: LocalDateTable_642c1dbb-2007-4c1b-9ffe-3f8ff9af26f6.Date
+
+relationship 7c4b2fe8-de62-4f1d-9e72-72e1ecffe27e
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_po.ngay
+	toColumn: LocalDateTable_2fe32c35-0ee4-4ba5-831c-c746d609a8c3.Date
+
+relationship 8d6c1708-6df2-4638-9f82-79bfa3a84097
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_po.ngay_tao
+	toColumn: LocalDateTable_d695e166-2845-4e1b-a97b-c565bc48dd48.Date
+
+relationship adf1be49-1101-47b8-94c0-dfc9346f332d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_po.ngay_dat
+	toColumn: LocalDateTable_75cab2ed-20d1-4732-b798-6715ad6f23ca.Date
+
+relationship 16b04046-0e33-4592-ad07-01a08f8711d1
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_po.han_giao
+	toColumn: LocalDateTable_ab51eb25-9a64-4400-881b-a23ed025a8ad.Date
+
+relationship db49b65e-f811-4b3f-99bd-22fdd34d5d8f
+	joinOnDateBehavior: datePartOnly
+	fromColumn: day_ton_xau.ngay_kiem_tra
+	toColumn: LocalDateTable_5252c266-0333-4117-9f27-b87fa0603c1a.Date
+

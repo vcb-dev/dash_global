@@ -1,0 +1,142 @@
+table fact_doanh_thu
+	lineageTag: 7ce6ce4e-3bca-440a-921e-f1c7de2a9cd8
+
+	measure 'Doanh thu' = SUM(fact_doanh_thu[order_revenue_vnd])
+		formatString: #,0
+		lineageTag: 3c3678e0-41ef-4ddd-9157-4f0bd65f2b87
+
+	measure 'Doanh thu trước hoàn' = SUM(fact_doanh_thu[revenue_truoc_hoan])
+		formatString: #,0
+		lineageTag: 80ad91dd-c92d-4911-8750-c74b433362eb
+
+	measure 'Doanh thu hoàn' = SUM(fact_doanh_thu[doanh_thu_hoan])
+		formatString: #,0
+		lineageTag: 5d257f46-6a48-4a4f-a505-d70733f8208c
+
+	measure 'Đơn chốt' = SUM(fact_doanh_thu[don_chot])
+		formatString: #,0
+		lineageTag: 7e961e20-80c4-4084-87c5-7d62390d52ae
+
+	measure 'Số lượng bán' = SUM(fact_doanh_thu[so_luong])
+		formatString: #,0
+		lineageTag: a8325969-891d-4d24-a9f4-3b6014c2076a
+
+	measure 'Giá trị TB/đơn' = DIVIDE([Doanh thu], [Đơn chốt])
+		formatString: #,0
+		lineageTag: 26164ef6-7772-481a-bf5a-374e96dc98ce
+
+	measure 'Doanh thu MTD' = TOTALMTD([Doanh thu], dim_date[ngay])
+		formatString: #,0
+		lineageTag: 0e5dfc89-f0a2-4cf7-ab58-87e10e849460
+
+	measure 'Đơn chốt MTD' = TOTALMTD([Đơn chốt], dim_date[ngay])
+		formatString: #,0
+		lineageTag: bce06143-f06d-445e-a5bb-cc2a17161542
+
+	measure 'Tỷ trọng doanh thu' = DIVIDE([Doanh thu], CALCULATE([Doanh thu], ALLSELECTED(dim_spu)))
+		formatString: 0.0%
+		lineageTag: 5093b2a0-4838-4913-a047-84f51b5cce18
+
+	measure '⚠ DT mã trung gian' = CALCULATE([Doanh thu], dim_spu[phan_khuc] = "Mã trung gian")
+		formatString: #,0
+		lineageTag: e9f1a2b3-4c5d-6e7f-8091-a2b3c4d5e6f7
+
+	measure 'Benchmark DT/ngày' = AVERAGEX(ALLSELECTED(dim_date[ngay]), CALCULATE([Doanh thu]))
+		formatString: #,0
+		lineageTag: be12ad76-264a-4c8a-8eaa-076fc8048622
+
+	measure 'Doanh thu tháng trước' = CALCULATE([Doanh thu], DATEADD(dim_date[ngay], -1, MONTH))
+		formatString: #,0
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890
+
+	measure '% vs tháng trước' = DIVIDE([Doanh thu] - [Doanh thu tháng trước], [Doanh thu tháng trước])
+		formatString: 0.0%
+		lineageTag: b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78901
+
+	measure 'Mục tiêu DT' = LOOKUPVALUE(dim_muc_tieu[muc_tieu_dt], dim_muc_tieu[thang], DATE(YEAR(MIN(dim_date[ngay])), MONTH(MIN(dim_date[ngay])), 1))
+		formatString: #,0
+		lineageTag: c3d4e5f6-a7b8-9012-c3d4-e5f6a7b89012
+
+	measure '% vs mục tiêu' = DIVIDE([Doanh thu], [Mục tiêu DT])
+		formatString: 0.0%
+		lineageTag: d4e5f6a7-b8c9-0123-d4e5-f6a7b8c90123
+
+	column ngay
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: cba0172a-d2da-46ba-b255-f1358bdd7240
+		summarizeBy: none
+		sourceColumn: ngay
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column kho
+		dataType: string
+		lineageTag: 0f1a7bbc-27bd-4b50-be58-04b61dabbdc8
+		summarizeBy: none
+		sourceColumn: kho
+
+	column sku
+		dataType: string
+		lineageTag: 6146a5ea-cc09-46d5-a4d7-e0370773c6a7
+		summarizeBy: none
+		sourceColumn: sku
+
+	column spu_key
+		dataType: string
+		lineageTag: 11b4747b-ceed-4480-86f6-b608fbb7f32c
+		summarizeBy: none
+		sourceColumn: spu_key
+
+	column size
+		dataType: string
+		lineageTag: 01546952-64bb-434a-baa3-8ce4655ce440
+		summarizeBy: none
+		sourceColumn: size
+
+	column don_chot
+		dataType: int64
+		formatString: #,0
+		lineageTag: b734a742-8a8b-44d8-925d-b40c69d8cadf
+		summarizeBy: none
+		sourceColumn: don_chot
+
+	column so_luong
+		dataType: double
+		formatString: #,0
+		lineageTag: a2f35a9c-1b44-4b2e-b864-71641a49bde5
+		summarizeBy: none
+		sourceColumn: so_luong
+
+	column order_revenue_vnd
+		dataType: double
+		formatString: #,0
+		lineageTag: 6ad3179f-ec89-4e09-90e9-9ee8eb09c78f
+		summarizeBy: none
+		sourceColumn: order_revenue_vnd
+
+	column revenue_truoc_hoan
+		dataType: double
+		formatString: #,0
+		lineageTag: 842bddeb-743c-4150-8f6e-9b8758dd039e
+		summarizeBy: none
+		sourceColumn: revenue_truoc_hoan
+
+	column doanh_thu_hoan
+		dataType: double
+		formatString: #,0
+		lineageTag: 5e45091e-0e00-4875-a795-761b9a395368
+		summarizeBy: none
+		sourceColumn: doanh_thu_hoan
+
+	partition fact_doanh_thu = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("aws-0-ap-southeast-1.pooler.supabase.com:5432", "postgres"),
+				    Nguon = Source{[Schema="global", Item="fact_doanh_thu_moi_nhat"]}[Data],
+				    Bo = Table.RemoveColumns(Nguon, {"lan_tai"}),
+				    KieuDuLieu = Table.TransformColumnTypes(Bo, {{"ngay", type date}, {"kho", type text}, {"sku", type text}, {"spu_key", type text}, {"size", type text}, {"don_chot", Int64.Type}, {"so_luong", type number}, {"order_revenue_vnd", type number}, {"revenue_truoc_hoan", type number}, {"doanh_thu_hoan", type number}})
+				in
+				    KieuDuLieu
+

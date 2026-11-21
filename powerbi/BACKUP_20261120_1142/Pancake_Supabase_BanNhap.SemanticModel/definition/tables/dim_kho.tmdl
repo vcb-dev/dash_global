@@ -1,0 +1,32 @@
+table dim_kho
+	lineageTag: b15e613e-d8f7-4103-a279-2b336c05f687
+
+	column kho
+		dataType: string
+		lineageTag: e70340b4-8768-4383-aa65-d71366c0b4e7
+		summarizeBy: none
+		sourceColumn: kho
+
+	column kho_id
+		dataType: string
+		lineageTag: e854c0b6-ba05-4e72-b2a5-ca8c001fa879
+		summarizeBy: none
+		sourceColumn: kho_id
+
+	column ma_quoc_gia
+		dataType: string
+		lineageTag: cbd80118-e4fd-4188-b067-6260159949d2
+		summarizeBy: none
+		sourceColumn: ma_quoc_gia
+
+	partition dim_kho = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("aws-0-ap-southeast-1.pooler.supabase.com:5432", "postgres"),
+				    Nguon = Source{[Schema="global", Item="dim_kho"]}[Data],
+				    Bo = Nguon,
+				    KieuDuLieu = Table.TransformColumnTypes(Bo, {{"kho", type text}, {"kho_id", type text}, {"ma_quoc_gia", type text}})
+				in
+				    KieuDuLieu
+

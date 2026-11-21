@@ -1,0 +1,100 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 26.633108367128813,
+            "y": 438.94899384089433
+          },
+          "nodeIndex": "dim_date",
+          "nodeLineageTag": "29fe8a65-3f23-4c0e-8ee7-aaaf3b6ec141",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 339.88371106076312,
+            "y": 121.07492552458461
+          },
+          "nodeIndex": "dim_kho",
+          "nodeLineageTag": "b15e613e-d8f7-4103-a279-2b336c05f687",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 936.22937725722272,
+            "y": 88.484830218670709
+          },
+          "nodeIndex": "dim_spu",
+          "nodeLineageTag": "be72cc35-dc96-422d-8848-c7a33105897b",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 628.94751118366207,
+            "y": -50
+          },
+          "nodeIndex": "fact_doanh_thu",
+          "nodeLineageTag": "7ce6ce4e-3bca-440a-921e-f1c7de2a9cd8",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1346.1315307105747,
+            "y": 74.770762646129356
+          },
+          "nodeIndex": "fact_po",
+          "nodeLineageTag": "1a926bd7-551b-4653-87d2-17c127840d0c",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 642.12796426118325,
+            "y": 440.78887756744376
+          },
+          "nodeIndex": "fact_ton_kho",
+          "nodeLineageTag": "05ab1f11-d5c7-43ca-8c2b-ebe97863c624",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 51.354712421908488,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

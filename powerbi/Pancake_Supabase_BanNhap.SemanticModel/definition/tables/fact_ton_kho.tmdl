@@ -1,0 +1,132 @@
+table fact_ton_kho
+	lineageTag: 05ab1f11-d5c7-43ca-8c2b-ebe97863c624
+
+	measure 'Tồn cuối kỳ (SL)' = VAR d = MAX(fact_ton_kho[ngay]) RETURN CALCULATE(SUM(fact_ton_kho[inventory_qty]), dim_date[ngay] = d)
+		formatString: #,0
+		lineageTag: eea54fb0-71d1-4045-beb3-fa0355f28396
+
+	measure 'Giá trị tồn cuối kỳ' = VAR d = MAX(fact_ton_kho[ngay]) RETURN CALCULATE(SUM(fact_ton_kho[inventory_value]), dim_date[ngay] = d)
+		formatString: #,0
+		lineageTag: f816879c-c5e3-44da-8b96-006b19392912
+
+	measure 'Nhập kho' = SUM(fact_ton_kho[import_qty])
+		formatString: #,0
+		lineageTag: fe95accb-eccf-4a6b-9c78-35e6b87510c6
+
+	measure 'Xuất bán' = SUM(fact_ton_kho[sell_export_qty])
+		formatString: #,0
+		lineageTag: 9098c771-4f7c-46f8-a6e0-7dcd6de89246
+
+	measure 'Ngày chốt tồn xấu' = MAX(dim_date[ngay])
+		formatString: dd/MM/yyyy
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60001
+
+	measure 'Nhãn cohort tồn xấu' = IF([Flag tồn xấu chốt] = 1, "Tồn xấu (đã chốt)", BLANK())
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60010
+
+	measure 'Tồn xấu lúc chốt' = VAR d = MAX(dim_date[ngay]) VAR dTon = CALCULATE(MAX(fact_ton_kho[ngay]), REMOVEFILTERS(dim_date), fact_ton_kho[ngay] <= d) RETURN IF(ISBLANK(d) || ISBLANK(dTon), BLANK(), CALCULATE(SUM(fact_ton_kho[inventory_qty]), REMOVEFILTERS(dim_date), fact_ton_kho[ngay] = dTon))
+		formatString: #,0
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60008
+
+	measure 'SL bán 30 ngày trước chốt' = VAR d = MAX(dim_date[ngay]) RETURN IF(ISBLANK(d), BLANK(), CALCULATE(SUM(fact_doanh_thu[so_luong]), REMOVEFILTERS(dim_date), fact_doanh_thu[ngay] >= d - 29, fact_doanh_thu[ngay] <= d))
+		formatString: #,0
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60002
+
+	measure 'Flag tồn xấu chốt' = VAR d = MAX(dim_date[ngay]) VAR spu = SELECTEDVALUE(dim_spu[spu_key]) VAR loai = SELECTEDVALUE(dim_spu[loai_ma]) VAR ngayTao = SELECTEDVALUE(dim_spu[ngay_tao_ma]) VAR ban = CALCULATE(SUM(fact_doanh_thu[so_luong]), REMOVEFILTERS(dim_date), REMOVEFILTERS(dim_kho), fact_doanh_thu[ngay] >= d - 29, fact_doanh_thu[ngay] <= d) VAR ton = CALCULATE([Tồn xấu lúc chốt], REMOVEFILTERS(dim_kho)) VAR nhapDau = CALCULATE(MIN(fact_ton_kho[ngay]), REMOVEFILTERS(dim_date), REMOVEFILTERS(dim_kho), fact_ton_kho[import_qty] <> 0) VAR hangMoi = (NOT ISBLANK(nhapDau) && nhapDau >= d - 29) || (NOT ISBLANK(ngayTao) && ngayTao >= d - 29) VAR trungGian = CONTAINSSTRING(SUBSTITUTE(UPPER(spu), " ", ""), "MATRUNGGIANBAC") RETURN IF(ISBLANK(d) || ISBLANK(spu), BLANK(), IF(trungGian || loai <> "Sản phẩm" || hangMoi, 0, IF(IF(ISBLANK(ban), 0, ban) = 0 && IF(ISBLANK(ton), 0, ton) > 0, 1, 0)))
+		formatString: 0
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60003
+
+	measure 'SL đẩy sau chốt' = VAR d = MAX(dim_date[ngay]) RETURN IF(ISBLANK(d), BLANK(), CALCULATE(SUM(fact_doanh_thu[so_luong]), REMOVEFILTERS(dim_date), fact_doanh_thu[ngay] > d))
+		formatString: #,0
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60004
+
+	measure 'DT đẩy sau chốt' = VAR d = MAX(dim_date[ngay]) RETURN IF(ISBLANK(d), BLANK(), CALCULATE(SUM(fact_doanh_thu[order_revenue_vnd]), REMOVEFILTERS(dim_date), fact_doanh_thu[ngay] > d))
+		formatString: #,0
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60005
+
+	measure 'Tồn còn lại lô xấu' = VAR ton0 = [Tồn xấu lúc chốt] VAR sl = [SL đẩy sau chốt] RETURN IF(ISBLANK(ton0), BLANK(), MAX(0, ton0 - IF(ISBLANK(sl), 0, sl)))
+		formatString: #,0
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60011
+
+	measure 'Trạng thái lô xấu' = VAR sl = IF(ISBLANK([SL đẩy sau chốt]), 0, [SL đẩy sau chốt]) VAR con = [Tồn còn lại lô xấu] RETURN SWITCH(TRUE(), ISBLANK(con), BLANK(), sl > 0 && con = 0, "Đã đẩy hết lô", sl > 0, "Đang đẩy", "Chưa đẩy")
+		lineageTag: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f60006
+
+	column ngay
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: c75896d7-52da-49aa-9825-8577f8f6eb45
+		summarizeBy: none
+		sourceColumn: ngay
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column kho
+		dataType: string
+		lineageTag: 48f5425b-4f0f-47ab-a3ff-a2c409641eb9
+		summarizeBy: none
+		sourceColumn: kho
+
+	column sku
+		dataType: string
+		lineageTag: 187749f4-04dc-4c90-96c1-9aad5f6fd202
+		summarizeBy: none
+		sourceColumn: sku
+
+	column spu_key
+		dataType: string
+		lineageTag: 4d787fd6-cdb6-4116-9939-f84a9b67cf6d
+		summarizeBy: none
+		sourceColumn: spu_key
+
+	column size
+		dataType: string
+		lineageTag: 2b8b9dbd-aeb7-4448-9aa2-cff6681b9162
+		summarizeBy: none
+		sourceColumn: size
+
+	column begin_qty
+		dataType: double
+		formatString: #,0
+		lineageTag: f085ed7d-b738-4cfa-aebc-781773b40e29
+		summarizeBy: none
+		sourceColumn: begin_qty
+
+	column import_qty
+		dataType: double
+		formatString: #,0
+		lineageTag: 305180d3-6ae3-4405-9d89-fff0e573dc5c
+		summarizeBy: none
+		sourceColumn: import_qty
+
+	column sell_export_qty
+		dataType: double
+		formatString: #,0
+		lineageTag: 0c8eb5a4-3767-46e7-a258-4ea90c821e17
+		summarizeBy: none
+		sourceColumn: sell_export_qty
+
+	column inventory_qty
+		dataType: double
+		formatString: #,0
+		lineageTag: b7284411-8e50-47a0-8ba6-25cd8e277492
+		summarizeBy: none
+		sourceColumn: inventory_qty
+
+	column inventory_value
+		dataType: double
+		formatString: #,0
+		lineageTag: e034ad11-dfde-4198-b039-c79f58d5c6e5
+		summarizeBy: none
+		sourceColumn: inventory_value
+
+	partition fact_ton_kho = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("aws-0-ap-southeast-1.pooler.supabase.com:5432", "postgres"),
+				    Nguon = Source{[Schema="global_draft", Item="fact_ton_kho_moi_nhat"]}[Data],
+				    Bo = Table.RemoveColumns(Nguon, {"lan_tai"}),
+				    KieuDuLieu = Table.TransformColumnTypes(Bo, {{"ngay", type date}, {"kho", type text}, {"sku", type text}, {"spu_key", type text}, {"size", type text}, {"begin_qty", type number}, {"import_qty", type number}, {"sell_export_qty", type number}, {"inventory_qty", type number}, {"inventory_value", type number}})
+				in
+				    KieuDuLieu
+

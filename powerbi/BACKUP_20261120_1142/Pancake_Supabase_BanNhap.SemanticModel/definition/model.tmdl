@@ -1,0 +1,33 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: vi-VN
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["dim_date","dim_kho","dim_spu","fact_doanh_thu","fact_ton_kho","fact_po","dim_muc_tieu","day_ton_xau"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_date
+ref table dim_kho
+ref table dim_spu
+ref table fact_doanh_thu
+ref table fact_ton_kho
+ref table fact_po
+ref table dim_muc_tieu
+ref table day_ton_xau
+ref table DateTableTemplate_b6f15a23-42fb-4332-95c3-e95f7fd2d8af
+ref table LocalDateTable_aa873a41-9c44-4a03-a6f4-ed2c8c791fc0
+ref table LocalDateTable_642c1dbb-2007-4c1b-9ffe-3f8ff9af26f6
+ref table LocalDateTable_2fe32c35-0ee4-4ba5-831c-c746d609a8c3
+ref table LocalDateTable_d695e166-2845-4e1b-a97b-c565bc48dd48
+ref table LocalDateTable_75cab2ed-20d1-4732-b798-6715ad6f23ca
+ref table LocalDateTable_ab51eb25-9a64-4400-881b-a23ed025a8ad
+ref table LocalDateTable_5252c266-0333-4117-9f27-b87fa0603c1a
+
+ref cultureInfo en-US
+

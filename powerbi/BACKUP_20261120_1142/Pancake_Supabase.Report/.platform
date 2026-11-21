@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Pancake_Supabase"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "e5dfdad2-bac6-4552-851e-882366995e13"
+  }
+}

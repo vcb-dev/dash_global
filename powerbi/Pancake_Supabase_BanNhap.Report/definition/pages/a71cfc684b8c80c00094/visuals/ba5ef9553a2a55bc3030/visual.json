@@ -1,0 +1,381 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "ba5ef9553a2a55bc3030",
+  "position": {
+    "x": 24,
+    "y": 636,
+    "z": 4000,
+    "height": 420,
+    "width": 1872,
+    "tabOrder": 4000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "spu_key"
+                }
+              },
+              "queryRef": "day_ton_xau.spu_key",
+              "nativeQueryRef": "SPU",
+              "displayName": "SPU"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "ten_san_pham"
+                }
+              },
+              "queryRef": "day_ton_xau.ten_san_pham",
+              "nativeQueryRef": "Tên sản phẩm",
+              "displayName": "Tên sản phẩm"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "Nhãn cohort đóng băng"
+                }
+              },
+              "queryRef": "day_ton_xau.Nhãn cohort đóng băng",
+              "nativeQueryRef": "Cohort",
+              "displayName": "Cohort"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "Tồn xấu ban đầu"
+                }
+              },
+              "queryRef": "day_ton_xau.Tồn xấu ban đầu",
+              "nativeQueryRef": "Tồn cuối kỳ (SL) lúc chốt",
+              "displayName": "Tồn cuối kỳ (SL) lúc chốt"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "SL đẩy cohort"
+                }
+              },
+              "queryRef": "day_ton_xau.SL đẩy cohort",
+              "nativeQueryRef": "SL đẩy",
+              "displayName": "SL đẩy"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "DT đẩy cohort"
+                }
+              },
+              "queryRef": "day_ton_xau.DT đẩy cohort",
+              "nativeQueryRef": "DT đẩy",
+              "displayName": "DT đẩy"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "Tồn xấu còn lại"
+                }
+              },
+              "queryRef": "day_ton_xau.Tồn xấu còn lại",
+              "nativeQueryRef": "Tồn xấu còn lại",
+              "displayName": "Tồn xấu còn lại"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "Trạng thái cohort"
+                }
+              },
+              "queryRef": "day_ton_xau.Trạng thái cohort",
+              "nativeQueryRef": "Trạng thái",
+              "displayName": "Trạng thái"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "day_ton_xau"
+                  }
+                },
+                "Property": "DT đẩy cohort"
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'''Segoe UI Bold'', wf_segoe-ui_bold, helvetica, arial, sans-serif'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#252E80'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Chi tiết cohort — Tồn cuối kỳ (SL) lúc chốt / SL·DT đẩy / còn lại'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#24364B'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#44546A'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "tbl_snap_one",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "day_ton_xau"
+              }
+            },
+            "Property": "ngay_snapshot"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "day_ton_xau",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "ngay_snapshot"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "datetime'2026-11-19T00:00:00'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "tbl_spu",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "day_ton_xau"
+              }
+            },
+            "Property": "spu_key"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "tbl_ten",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "day_ton_xau"
+              }
+            },
+            "Property": "ten_san_pham"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
+  }
+}

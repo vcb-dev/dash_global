@@ -1,0 +1,36 @@
+table dim_muc_tieu
+	lineageTag: f1a2b3c4-d5e6-7890-f1a2-b3c4d5e67890
+
+	column thang
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: f1a2b3c4-d5e6-7890-f1a2-b3c4d5e67891
+		summarizeBy: none
+		sourceColumn: thang
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column muc_tieu_dt
+		dataType: double
+		formatString: #,0
+		lineageTag: f1a2b3c4-d5e6-7890-f1a2-b3c4d5e67892
+		summarizeBy: none
+		sourceColumn: muc_tieu_dt
+
+	column ghi_chu
+		dataType: string
+		lineageTag: f1a2b3c4-d5e6-7890-f1a2-b3c4d5e67893
+		summarizeBy: none
+		sourceColumn: ghi_chu
+
+	partition dim_muc_tieu = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("aws-0-ap-southeast-1.pooler.supabase.com:5432", "postgres"),
+				    Nguon = Source{[Schema="global_draft", Item="dim_muc_tieu"]}[Data],
+				    Bo = Nguon,
+				    KieuDuLieu = Table.TransformColumnTypes(Bo, {{"thang", type date}, {"muc_tieu_dt", type number}, {"ghi_chu", type text}})
+				in
+				    KieuDuLieu
+

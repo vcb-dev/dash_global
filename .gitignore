@@ -1,0 +1,23 @@
+# secrets
+.env
+.env.*
+!.env.example
+web/.env
+web/.env.*
+!web/.env.example
+
+# dependencies & runtime
+node_modules/
+web/node_modules/
+tools/node/
+
+# data exports / local caches
+output/
+*.log
+.DS_Store
+Thumbs.db
+
+# Power BI local / generated noise (keep source scripts)
+powerbi/**/*.pbix
+powerbi/**/.pbi/
+**/~$*

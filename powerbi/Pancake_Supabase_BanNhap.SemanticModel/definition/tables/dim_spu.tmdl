@@ -1,0 +1,126 @@
+table dim_spu
+	lineageTag: be72cc35-dc96-422d-8848-c7a33105897b
+
+	measure 'Số SPU' = DISTINCTCOUNT(dim_spu[spu_key])
+		formatString: #,0
+		lineageTag: 71f25f46-8d7d-46da-9db2-1736a705e9dc
+
+	measure 'Số SPU theo phân khúc' = CALCULATE(DISTINCTCOUNT(dim_spu[spu_key]), NOT ISBLANK(dim_spu[phan_khuc]))
+		formatString: #,0
+		lineageTag: 7b90d592-5d74-4caa-a066-4269bba7b070
+
+	column spu_key
+		dataType: string
+		lineageTag: 630182c4-ca01-429a-8309-904d5149fab6
+		summarizeBy: none
+		sourceColumn: spu_key
+
+	column ten_san_pham
+		dataType: string
+		lineageTag: f05c8f14-10a2-406f-98fd-413e1ce41002
+		summarizeBy: none
+		sourceColumn: ten_san_pham
+
+	column chung_loai
+		dataType: string
+		lineageTag: 134bfb67-8e10-4382-b0bf-8fda4f172177
+		summarizeBy: none
+		sourceColumn: chung_loai
+
+	column loai_ma
+		dataType: string
+		lineageTag: c86860d9-e171-433d-9d5c-8e518185e417
+		summarizeBy: none
+		sourceColumn: loai_ma
+
+	column ngay_tao_ma
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 12c879ee-e1d9-4666-a4b9-3998914d81e1
+		summarizeBy: none
+		sourceColumn: ngay_tao_ma
+
+		variation Variation
+			isDefault
+			relationship: 231b05eb-755b-40fb-8084-ea93ee6e123f
+			defaultHierarchy: LocalDateTable_aa873a41-9c44-4a03-a6f4-ed2c8c791fc0.'Date Hierarchy'
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ma_cu_moi
+		dataType: string
+		lineageTag: d017ed17-9911-4cab-81f7-28c20cc92d8a
+		summarizeBy: none
+		sourceColumn: ma_cu_moi
+
+	column trong_danh_muc
+		dataType: string
+		lineageTag: d8e75c47-2cc2-4c14-b5c3-f04b22e29f81
+		summarizeBy: none
+		sourceColumn: trong_danh_muc
+
+	column spu_goc
+		dataType: string
+		lineageTag: 6e4590e2-055d-45ca-8836-2f83c7aa6778
+		summarizeBy: none
+		sourceColumn: spu_goc
+
+	column chung_loai_pos
+		dataType: string
+		lineageTag: d308d421-6e39-4250-890d-facda4b66adc
+		summarizeBy: none
+		sourceColumn: chung_loai_pos
+
+	column phan_khuc
+		dataType: string
+		lineageTag: 23e20877-dc30-441a-9035-c01d369aa401
+		summarizeBy: none
+		sourceColumn: phan_khuc
+
+	column sl_30_ngay
+		dataType: double
+		formatString: #,0
+		lineageTag: 20395882-38b2-457a-a154-155fd71b2166
+		summarizeBy: sum
+		sourceColumn: sl_30_ngay
+
+		annotation SummarizationSetBy = Automatic
+
+	column ngay_chot_phan_khuc
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 717602b9-debc-450a-aa5a-af9701284f8b
+		summarizeBy: none
+		sourceColumn: ngay_chot_phan_khuc
+
+		variation Variation
+			isDefault
+			relationship: c41e00bf-fd6a-4c05-812c-17018b681589
+			defaultHierarchy: LocalDateTable_642c1dbb-2007-4c1b-9ffe-3f8ff9af26f6.'Date Hierarchy'
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column spunew
+		dataType: string
+		lineageTag: 5b4fbb1e-91bb-4956-a3b8-8b38aca677e4
+		summarizeBy: none
+		sourceColumn: spunew
+
+		annotation SummarizationSetBy = Automatic
+
+	column nhom_ma = IF(ISBLANK(dim_spu[ma_cu_moi]) || dim_spu[ma_cu_moi] = "", "Chưa gắn", dim_spu[ma_cu_moi])
+		dataType: string
+		lineageTag: f1a2b3c4-5d6e-7f80-91a2-b3c4d5e6f708
+		summarizeBy: none
+
+	partition dim_spu = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("aws-0-ap-southeast-1.pooler.supabase.com:5432", "postgres"),
+				    Nguon = Source{[Schema="global_draft", Item="dim_spu"]}[Data],
+				    Bo = Nguon,
+				    KieuDuLieu = Table.TransformColumnTypes(Bo, {{"spu_key", type text}, {"ten_san_pham", type text}, {"chung_loai", type text}, {"loai_ma", type text}, {"ngay_tao_ma", type date}, {"ma_cu_moi", type text}, {"trong_danh_muc", type text}, {"spu_goc", type text}, {"chung_loai_pos", type text}, {"phan_khuc", type text}, {"sl_30_ngay", type number}, {"ngay_chot_phan_khuc", type date}})
+				in
+				    KieuDuLieu
+

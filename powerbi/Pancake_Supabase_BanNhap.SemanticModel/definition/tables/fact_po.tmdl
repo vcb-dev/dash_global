@@ -1,0 +1,235 @@
+table fact_po
+	lineageTag: 1a926bd7-551b-4653-87d2-17c127840d0c
+
+	measure 'Hàng đang về' = SUM(fact_po[so_luong_con_thieu])
+		formatString: #,0
+		lineageTag: 5364ddd6-610d-4ee0-bd32-323dd9f05003
+
+	measure 'SL đặt PO' = SUM(fact_po[so_luong_dat])
+		formatString: #,0
+		lineageTag: 06ee197e-d800-43af-9fc6-0839c909ea2f
+
+	measure 'SL đã nhận PO' = SUM(fact_po[so_luong_da_nhan])
+		formatString: #,0
+		lineageTag: 4e2337ab-6283-461b-81c4-dab8f3c87772
+
+	measure 'Số dòng PO' = COUNTROWS(fact_po)
+		formatString: #,0
+		lineageTag: d93081ac-e795-41dd-ac6e-3e0342717c38
+
+	measure 'Số PO' = DISTINCTCOUNT(fact_po[ma_po])
+		formatString: #,0
+		lineageTag: 5ba8e420-e897-4a2b-84ac-3936eda5329f
+
+	measure 'Số ngày tới ETA' = VAR eta = MAX(fact_po[han_giao]) RETURN IF(ISBLANK(eta), BLANK(), DATEDIFF(TODAY(), eta, DAY))
+		formatString: #,0
+		lineageTag: a1c4e8f2-3b5d-4e7a-9c1f-2d6b8a0e4f71
+
+	measure 'Gợi ý' = VAR pk = SELECTEDVALUE(dim_spu[phan_khuc]) VAR po = [Hàng đang về] VAR gt = [Giá trị tồn cuối kỳ] RETURN SWITCH(TRUE(), pk = "Bán chạy" && po > 0, "Ưu tiên nhận/QC/lên kệ", pk = "Bán chạy", "Giữ stock — cân nhắc đặt nếu thiếu", pk = "Tồn xấu" && gt > 0, "Xả tồn / cắt đặt", pk = "Bán chậm" && gt > 0, "Theo dõi — hạn chế nhập", pk = "Bán thường", "Duy trì tồn tiêu chuẩn", BLANK())
+		lineageTag: b2d5f9a3-4c6e-5f8b-0d2a-3e7c9b1f5a82
+
+	measure 'SL quá hạn' = CALCULATE([Hàng đang về], fact_po[han_giao] < TODAY())
+		formatString: #,0
+		lineageTag: d4f7b1c5-6e8a-710d-2f4c-5a9e1d3b7c04
+
+	measure 'SL sắp đến hạn' = CALCULATE([Hàng đang về], fact_po[han_giao] >= TODAY() && fact_po[han_giao] <= TODAY() + 7)
+		formatString: #,0
+		lineageTag: e5a8c2d6-7f9b-821e-3a5d-6b0f2e4c8d15
+
+	measure 'SL còn hạn' = CALCULATE([Hàng đang về], fact_po[han_giao] > TODAY() + 7)
+		formatString: #,0
+		lineageTag: f6b9d3e7-80ac-932f-4b6e-7c1a3f5d9e26
+
+	measure 'Dòng quá hạn' = CALCULATE([Số dòng PO], fact_po[han_giao] < TODAY())
+		formatString: #,0
+		lineageTag: a7c0e4f8-91bd-043a-5c7f-8d2b4a6e0f37
+
+	column ngay
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: a3df4a0f-9998-4c0f-bfa3-49623e9d6343
+		summarizeBy: none
+		sourceColumn: ngay
+
+		variation Variation
+			isDefault
+			relationship: 7c4b2fe8-de62-4f1d-9e72-72e1ecffe27e
+			defaultHierarchy: LocalDateTable_2fe32c35-0ee4-4ba5-831c-c746d609a8c3.'Date Hierarchy'
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ma_po
+		dataType: string
+		lineageTag: d297e026-3e75-40c3-8649-db5686b273a5
+		summarizeBy: none
+		sourceColumn: ma_po
+
+	column loai_don
+		dataType: string
+		lineageTag: ad29a91d-78cb-4b37-a578-21985a1cc277
+		summarizeBy: none
+		sourceColumn: loai_don
+
+	column trang_thai
+		dataType: string
+		lineageTag: 072adec2-7391-4615-a7ea-2b52fcf0e48b
+		summarizeBy: none
+		sourceColumn: trang_thai
+
+	column ngay_tao
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 9002978e-666f-4d44-95b7-437274fbcf8c
+		summarizeBy: none
+		sourceColumn: ngay_tao
+
+		variation Variation
+			isDefault
+			relationship: 8d6c1708-6df2-4638-9f82-79bfa3a84097
+			defaultHierarchy: LocalDateTable_d695e166-2845-4e1b-a97b-c565bc48dd48.'Date Hierarchy'
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ngay_dat
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 804fab4d-9c45-4fec-b225-429b1d36b15f
+		summarizeBy: none
+		sourceColumn: ngay_dat
+
+		variation Variation
+			isDefault
+			relationship: adf1be49-1101-47b8-94c0-dfc9346f332d
+			defaultHierarchy: LocalDateTable_75cab2ed-20d1-4732-b798-6715ad6f23ca.'Date Hierarchy'
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column han_giao
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: f4a1078e-4426-4770-9c67-127687e82f57
+		summarizeBy: none
+		sourceColumn: han_giao
+
+		variation Variation
+			isDefault
+			relationship: 16b04046-0e33-4592-ad07-01a08f8711d1
+			defaultHierarchy: LocalDateTable_ab51eb25-9a64-4400-881b-a23ed025a8ad.'Date Hierarchy'
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column nha_cung_cap
+		dataType: string
+		lineageTag: ed1e97ac-140c-4f6f-a06c-d2d5f6f5274f
+		summarizeBy: none
+		sourceColumn: nha_cung_cap
+
+	column ma_ncc
+		dataType: string
+		lineageTag: 0885a4de-d10c-45e9-b5ea-c1f64c90bed6
+		summarizeBy: none
+		sourceColumn: ma_ncc
+
+	column nguoi_tao
+		dataType: string
+		lineageTag: 768310f0-1780-4f43-b3d6-7360b0d67834
+		summarizeBy: none
+		sourceColumn: nguoi_tao
+
+	column nguoi_phu_trach
+		dataType: string
+		lineageTag: e3f84f6f-8b51-4364-98f3-f31ad1af2be1
+		summarizeBy: none
+		sourceColumn: nguoi_phu_trach
+
+	column team_dat_hang
+		dataType: string
+		lineageTag: f00c029e-74c8-454c-b366-aa1c80e5b344
+		summarizeBy: none
+		sourceColumn: team_dat_hang
+
+	column ghi_chu_po
+		dataType: string
+		lineageTag: d19be60c-6074-44df-9607-dcea66321552
+		summarizeBy: none
+		sourceColumn: ghi_chu_po
+
+	column sku
+		dataType: string
+		lineageTag: 25f921bb-dfab-4bb8-877d-17315e36fa95
+		summarizeBy: none
+		sourceColumn: sku
+
+	column spu_key
+		dataType: string
+		lineageTag: 20a5dfae-e92a-4c41-a4f7-4715182e69c2
+		summarizeBy: none
+		sourceColumn: spu_key
+
+	column ten_san_pham
+		dataType: string
+		lineageTag: 7086545c-cc7a-42b2-8c75-c8368c81ed10
+		summarizeBy: none
+		sourceColumn: ten_san_pham
+
+	column ma_sp_goc
+		dataType: string
+		lineageTag: faeda311-03cf-49f4-8219-01703765bb98
+		summarizeBy: none
+		sourceColumn: ma_sp_goc
+
+	column phan_loai_bien_the
+		dataType: string
+		lineageTag: 4e410434-bb10-4e52-b5de-bf0d2080f8a5
+		summarizeBy: none
+		sourceColumn: phan_loai_bien_the
+
+	column so_luong_dat
+		dataType: double
+		formatString: #,0
+		lineageTag: 025ef3bb-6ef1-42f5-a8d3-d0c846184842
+		summarizeBy: sum
+		sourceColumn: so_luong_dat
+
+		annotation SummarizationSetBy = Automatic
+
+	column so_luong_da_nhan
+		dataType: double
+		formatString: #,0
+		lineageTag: c525afd8-7111-4bd2-869f-c8ba8ddf08a9
+		summarizeBy: sum
+		sourceColumn: so_luong_da_nhan
+
+		annotation SummarizationSetBy = Automatic
+
+	column so_luong_con_thieu
+		dataType: double
+		formatString: #,0
+		lineageTag: d92a1a50-26b0-445e-8a7b-da9c1a0a991d
+		summarizeBy: sum
+		sourceColumn: so_luong_con_thieu
+
+		annotation SummarizationSetBy = Automatic
+
+	column thong_so_ky_thuat
+		dataType: string
+		lineageTag: d17bf48a-e2cd-46cd-aec2-c78b81729b6d
+		summarizeBy: none
+		sourceColumn: thong_so_ky_thuat
+
+	column 'Flag ETA' = IF(ISBLANK(fact_po[han_giao]), BLANK(), IF(fact_po[han_giao] < TODAY(), "Quá hạn", IF(fact_po[han_giao] <= TODAY() + 7, "Sắp đến hạn", "Còn hạn")))
+		dataType: string
+		lineageTag: b8d1f5a9-02ce-154b-6d8a-9e3c5b7f1a48
+		summarizeBy: none
+
+	partition fact_po = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("aws-0-ap-southeast-1.pooler.supabase.com:5432", "postgres"),
+				    Nguon = Source{[Schema="global_draft", Item="fact_po_moi_nhat"]}[Data],
+				    Bo = Table.RemoveColumns(Nguon, {"lan_tai"}),
+				    KieuDuLieu = Table.TransformColumnTypes(Bo, {{"ngay", type date}, {"ma_po", type text}, {"loai_don", type text}, {"trang_thai", type text}, {"ngay_tao", type date}, {"ngay_dat", type date}, {"han_giao", type date}, {"nha_cung_cap", type text}, {"ma_ncc", type text}, {"nguoi_tao", type text}, {"nguoi_phu_trach", type text}, {"team_dat_hang", type text}, {"ghi_chu_po", type text}, {"sku", type text}, {"spu_key", type text}, {"ten_san_pham", type text}, {"ma_sp_goc", type text}, {"phan_loai_bien_the", type text}, {"so_luong_dat", type number}, {"so_luong_da_nhan", type number}, {"so_luong_con_thieu", type number}, {"thong_so_ky_thuat", type text}})
+				in
+				    KieuDuLieu
+

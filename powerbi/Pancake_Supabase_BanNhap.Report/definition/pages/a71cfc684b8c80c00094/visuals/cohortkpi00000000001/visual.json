@@ -1,0 +1,149 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "cohortkpi00000000001",
+  "position": {
+    "x": 320,
+    "y": 520,
+    "z": 4600,
+    "height": 100,
+    "width": 1576,
+    "tabOrder": 4600
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "Tồn xấu ban đầu"
+                }
+              },
+              "queryRef": "day_ton_xau.Tồn xấu ban đầu",
+              "nativeQueryRef": "Tồn cuối kỳ (SL) lúc chốt",
+              "displayName": "Tồn cuối kỳ (SL) lúc chốt"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "SL đẩy cohort"
+                }
+              },
+              "queryRef": "day_ton_xau.SL đẩy cohort",
+              "nativeQueryRef": "SL đẩy",
+              "displayName": "SL đẩy"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "DT đẩy cohort"
+                }
+              },
+              "queryRef": "day_ton_xau.DT đẩy cohort",
+              "nativeQueryRef": "DT đẩy",
+              "displayName": "DT đẩy"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "Tồn xấu còn lại"
+                }
+              },
+              "queryRef": "day_ton_xau.Tồn xấu còn lại",
+              "nativeQueryRef": "Tồn xấu còn lại",
+              "displayName": "Tồn xấu còn lại"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "day_ton_xau"
+                    }
+                  },
+                  "Property": "Số mã cohort"
+                }
+              },
+              "queryRef": "day_ton_xau.Số mã cohort",
+              "nativeQueryRef": "Số mã",
+              "displayName": "Số mã"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "label": [
+        {
+          "properties": {
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'''Segoe UI Bold'', wf_segoe-ui_bold, helvetica, arial, sans-serif'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#44546A'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

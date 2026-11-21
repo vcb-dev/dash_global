@@ -1,0 +1,153 @@
+table day_ton_xau
+	lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56789
+
+	measure 'Ngày chốt cohort' = MAX(day_ton_xau[ngay_snapshot])
+		formatString: dd/MM/yyyy
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56708
+
+	measure 'Tồn xấu ban đầu' = VAR chot = [Ngày chốt cohort] RETURN IF(ISBLANK(chot), BLANK(), CALCULATE(SUM(day_ton_xau[ton_luc_chot]), day_ton_xau[ngay_snapshot] = chot))
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56706
+
+	measure 'SL đẩy cohort' = VAR chot = [Ngày chốt cohort] VAR ds = CALCULATETABLE(VALUES(day_ton_xau[spu_key]), day_ton_xau[ngay_snapshot] = chot) RETURN IF(ISEMPTY(ds) || ISBLANK(chot), BLANK(), CALCULATE(SUM(fact_doanh_thu[so_luong]), REMOVEFILTERS(dim_date), fact_doanh_thu[ngay] > chot, TREATAS(ds, fact_doanh_thu[spu_key])))
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56701
+
+	measure 'DT đẩy cohort' = VAR chot = [Ngày chốt cohort] VAR ds = CALCULATETABLE(VALUES(day_ton_xau[spu_key]), day_ton_xau[ngay_snapshot] = chot) RETURN IF(ISEMPTY(ds) || ISBLANK(chot), BLANK(), CALCULATE(SUM(fact_doanh_thu[order_revenue_vnd]), REMOVEFILTERS(dim_date), fact_doanh_thu[ngay] > chot, TREATAS(ds, fact_doanh_thu[spu_key])))
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56702
+
+	measure 'Tồn xấu còn lại' = VAR ton0 = [Tồn xấu ban đầu] VAR sl = [SL đẩy cohort] RETURN IF(ISBLANK(ton0), BLANK(), MAX(0, ton0 - IF(ISBLANK(sl), 0, sl)))
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56704
+
+	measure 'Số mã cohort' = VAR chot = [Ngày chốt cohort] RETURN IF(ISBLANK(chot), BLANK(), CALCULATE(DISTINCTCOUNT(day_ton_xau[spu_key]), day_ton_xau[ngay_snapshot] = chot))
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56705
+
+	measure 'Trạng thái cohort' = VAR sl = IF(ISBLANK([SL đẩy cohort]), 0, [SL đẩy cohort]) VAR con = [Tồn xấu còn lại] RETURN SWITCH(TRUE(), ISBLANK(con), BLANK(), sl > 0 && con = 0, "Đã đẩy hết lô", sl > 0, "Đang đẩy", "Chưa đẩy")
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56709
+
+	measure 'Nhãn cohort đóng băng' = "Tồn xấu (đã chốt)"
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56725
+
+	column ngay_snapshot
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56710
+		summarizeBy: none
+		sourceColumn: ngay_snapshot
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ngay_bat_dau_theo_doi
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56724
+		summarizeBy: none
+		sourceColumn: ngay_bat_dau_theo_doi
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ngay_kiem_tra
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56722
+		summarizeBy: none
+		sourceColumn: ngay_kiem_tra
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column spu_key
+		dataType: string
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56711
+		summarizeBy: none
+		sourceColumn: spu_key
+
+	column ten_san_pham
+		dataType: string
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56712
+		summarizeBy: none
+		sourceColumn: ten_san_pham
+
+	column ton_luc_chot
+		dataType: double
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56713
+		summarizeBy: sum
+		sourceColumn: ton_luc_chot
+
+	column gt_luc_chot
+		dataType: double
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56714
+		summarizeBy: sum
+		sourceColumn: gt_luc_chot
+
+	column sl_30_tai_chot
+		dataType: double
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56715
+		summarizeBy: none
+		sourceColumn: sl_30_tai_chot
+
+	column ngay_nhap_dau
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56716
+		summarizeBy: none
+		sourceColumn: ngay_nhap_dau
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column sl_ban_sau_chot
+		dataType: double
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56717
+		summarizeBy: sum
+		sourceColumn: sl_ban_sau_chot
+
+	column dt_sau_chot
+		dataType: double
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56718
+		summarizeBy: sum
+		sourceColumn: dt_sau_chot
+
+	column trang_thai_day
+		dataType: string
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56723
+		summarizeBy: none
+		sourceColumn: trang_thai_day
+
+	column ton_hien_tai
+		dataType: double
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56719
+		summarizeBy: sum
+		sourceColumn: ton_hien_tai
+
+	column gt_ton_hien_tai
+		dataType: double
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56720
+		summarizeBy: sum
+		sourceColumn: gt_ton_hien_tai
+
+	column sl_giam_ton
+		dataType: double
+		formatString: #,0
+		lineageTag: e0f1a2b3-c4d5-6789-e0f1-a2b3c4d56721
+		summarizeBy: sum
+		sourceColumn: sl_giam_ton
+
+	partition day_ton_xau = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("aws-0-ap-southeast-1.pooler.supabase.com:5432", "postgres"),
+				    Nguon = Source{[Schema="global_draft", Item="vw_day_ton_xau"]}[Data],
+				    Bo = Nguon,
+				    KieuDuLieu = Table.TransformColumnTypes(Bo, {{"ngay_snapshot", type date}, {"ngay_bat_dau_theo_doi", type date}, {"ngay_kiem_tra", type date}, {"spu_key", type text}, {"ten_san_pham", type text}, {"ton_luc_chot", type number}, {"gt_luc_chot", type number}, {"sl_30_tai_chot", type number}, {"ngay_nhap_dau", type date}, {"sl_ban_sau_chot", type number}, {"dt_sau_chot", type number}, {"trang_thai_day", type text}, {"ton_hien_tai", type number}, {"gt_ton_hien_tai", type number}, {"sl_giam_ton", type number}})
+				in
+				    KieuDuLieu
