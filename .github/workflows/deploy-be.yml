@@ -1,0 +1,85 @@
+name: Deploy BE
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'be/**'
+      - '.github/workflows/deploy-be.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-be
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: dash-global-be
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=,format=short
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./be
+          file: ./be/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Sync DB URL + redeploy Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
+          DATABASE_DIRECT: ${{ secrets.DATABASE_DIRECT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RAILWAY_TOKEN:-}" ]; then
+            echo "Missing secret RAILWAY_TOKEN"
+            exit 1
+          fi
+          if [ -z "${RAILWAY_SERVICE_ID:-}" ]; then
+            echo "Missing secret RAILWAY_SERVICE_ID"
+            exit 1
+          fi
+          if [ -z "${DATABASE_DIRECT:-}" ]; then
+            echo "Missing secret DATABASE_DIRECT"
+            exit 1
+          fi
+
+          npx -y @railway/cli@latest variable set \
+            SUPABASE_DB_URL --stdin \
+            --service "$RAILWAY_SERVICE_ID" \
+            --skip-deploys <<< "$DATABASE_DIRECT"
+
+          npx -y @railway/cli@latest redeploy \
+            --service "$RAILWAY_SERVICE_ID" \
+            --yes
