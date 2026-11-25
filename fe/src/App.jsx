@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, getJson } from './lib/api';
+import { api, apiOrigin, clearApiCache, getJson } from './lib/api';
 import HangDangVe from './pages/HangDangVe';
 import HanhDong from './pages/HanhDong';
+import Login from './pages/Login';
 import Overview from './pages/Overview';
 import SanPham from './pages/SanPham';
 import TonKho from './pages/TonKho';
@@ -42,25 +43,48 @@ export default function App() {
     phan_khuc: 'All',
     phan_nhom: 'All',
   });
-  const [user, setUser] = useState({ name: 'Pancake BI' });
+  const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
   const [filterOpts, setFilterOpts] = useState({ phan_khuc: [], phan_nhom: [] });
+  const debounceRef = useRef(null);
+  const filters = useMemo(() => applied, [applied]);
+  const meta = PAGES.find((p) => p.id === page) || {};
 
   useEffect(() => {
     getJson('/api/me')
-      .then((me) => setUser(me.user || { name: 'Pancake BI' }))
-      .catch(() => setUser({ name: 'Pancake BI' }));
+      .then((me) => {
+        setUser(me.authenticated ? me.user : null);
+        setAuthReady(true);
+      })
+      .catch(() => {
+        setUser(null);
+        setAuthReady(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
     api('/api/filters', applied)
       .then(setFilterOpts)
       .catch(() => setFilterOpts({ phan_khuc: [], phan_nhom: [] }));
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     location.hash = page;
   }, [page]);
 
-  const filters = useMemo(() => applied, [applied]);
-  const meta = PAGES.find((p) => p.id === page) || {};
-  const debounceRef = useRef(null);
+  async function logout() {
+    try {
+      await fetch(`${apiOrigin()}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      /* ignore */
+    }
+    clearApiCache();
+    setUser(null);
+  }
 
   function applyNow(next) {
     clearTimeout(debounceRef.current);
@@ -91,6 +115,25 @@ export default function App() {
     applySoon({ from, to, kho, phan_khuc: phanKhuc, phan_nhom: next });
   }
 
+  if (!authReady) {
+    return (
+      <div className="login-page">
+        <div className="login-card">Đang tải…</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Login
+        onSuccess={(u) => {
+          clearApiCache();
+          setUser(u);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -111,10 +154,13 @@ export default function App() {
           ))}
         </nav>
         <div className="user-box">
-          <div>{user?.name || 'Pancake BI'}</div>
+          <div>{user?.name || user?.username || 'User'}</div>
           <div className="muted" style={{ color: '#cbd5e1' }}>
-            Nội bộ
+            {user?.username || user?.email || 'Nội bộ'}
           </div>
+          <button type="button" className="logout" onClick={logout}>
+            Đăng xuất
+          </button>
         </div>
       </aside>
       <main className="main">

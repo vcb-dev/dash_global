@@ -24,8 +24,6 @@ function allowOrigin(origin) {
   return FE_ORIGIN;
 }
 
-const GUEST = { email: 'local', name: 'Pancake BI', picture: '' };
-
 function corsHeaders(req) {
   const allow = allowOrigin(req.headers.origin);
   return {
@@ -83,11 +81,18 @@ async function cachedJson(pathname, query, fn) {
 
 async function handleApi(req, res, pathname, query) {
   if (pathname === '/api/me') {
+    const user = auth.getUser(req);
     return send(res, req, 200, {
-      user: auth.getUser(req) || GUEST,
-      google: false,
-      devLogin: false,
+      user: user || null,
+      authenticated: !!user,
+      passwordLogin: auth.passwordAuthEnabled(),
+      google: auth.googleEnabled(),
+      devLogin: auth.devLoginEnabled(),
     });
+  }
+
+  if (auth.authRequired() && !auth.getUser(req)) {
+    return send(res, req, 401, { error: 'unauthorized' });
   }
 
   const map = {
@@ -106,6 +111,29 @@ async function handleApi(req, res, pathname, query) {
 }
 
 async function handleAuth(req, res, pathname, query) {
+  if (pathname === '/auth/login' && req.method === 'POST') {
+    if (!auth.passwordAuthEnabled()) {
+      return send(res, req, 400, { error: 'Password login chưa cấu hình (AUTH_USERS)' });
+    }
+    const raw = await readBody(req);
+    let username = '';
+    let password = '';
+    try {
+      const body = JSON.parse(raw || '{}');
+      username = body.username || body.email || '';
+      password = body.password || '';
+    } catch {
+      return send(res, req, 400, { error: 'Invalid JSON' });
+    }
+    const user = auth.verifyPasswordLogin(username, password);
+    if (!user) return send(res, req, 401, { error: 'Sai tài khoản hoặc mật khẩu' });
+    auth.setSession(res, user);
+    return send(res, req, 200, {
+      ok: true,
+      user: { email: user.email, name: user.name, username: user.username },
+    });
+  }
+
   if (pathname === '/auth/google') {
     if (!auth.googleEnabled()) return send(res, req, 400, { error: 'Google OAuth chưa cấu hình' });
     const state = crypto.randomBytes(16).toString('hex');
@@ -151,10 +179,13 @@ async function handleAuth(req, res, pathname, query) {
     return send(res, req, 200, { ok: true });
   }
 
-  if (pathname === '/auth/logout') {
+  if (pathname === '/auth/logout' && (req.method === 'POST' || req.method === 'GET')) {
     auth.clearSession(res);
-    res.writeHead(302, { Location: FE_ORIGIN + '/', ...corsHeaders(req) });
-    return res.end();
+    if (req.method === 'GET') {
+      res.writeHead(302, { Location: FE_ORIGIN + '/', ...corsHeaders(req) });
+      return res.end();
+    }
+    return send(res, req, 200, { ok: true });
   }
 
   return send(res, req, 404, { error: 'auth not found' });
@@ -187,4 +218,5 @@ server.listen(PORT, () => {
   console.log(`BE API → http://localhost:${PORT}`);
   console.log(`CORS FE_ORIGIN: ${FE_ORIGIN}`);
   console.log(`Schema: ${ENV.DB_SCHEMA || 'global'}`);
+  console.log(`Password login: ${auth.passwordAuthEnabled() ? 'on' : 'off'}`);
 });

@@ -84,6 +84,61 @@ button, input, select { font: inherit; }
   margin-top: 6px;
   color: #fecaca;
   font-size: 0.72rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.logout:hover { text-decoration: underline; }
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.login-card {
+  width: min(400px, 100%);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.login-brand {
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+}
+.login-card h1 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+.login-sub {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.login-card .field input {
+  width: 100%;
+  min-width: 0;
+}
+.login-error {
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+.login-btn {
+  width: 100%;
+  margin-top: 4px;
+  justify-content: center;
 }
 
 .main { padding: 16px 20px 32px; min-width: 0; }

@@ -11,6 +11,11 @@ export function filtersKey(filters = {}) {
 
 export async function getJson(path, opts = {}) {
   const res = await fetch(`${apiOrigin()}${path}`, { credentials: 'include', signal: opts.signal });
+  if (res.status === 401) {
+    const err = new Error('unauthorized');
+    err.code = 401;
+    throw err;
+  }
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
@@ -25,9 +30,18 @@ export async function api(path, filters = {}, opts = {}) {
   const key = u.toString();
   if (!opts.skipCache && memory.has(key)) return memory.get(key);
   const res = await fetch(key, { credentials: 'include', signal: opts.signal });
+  if (res.status === 401) {
+    const err = new Error('unauthorized');
+    err.code = 401;
+    throw err;
+  }
   if (!res.ok) throw new Error(await res.text());
   const json = await res.json();
   memory.set(key, json);
   if (memory.size > 40) memory.delete(memory.keys().next().value);
   return json;
+}
+
+export function clearApiCache() {
+  memory.clear();
 }

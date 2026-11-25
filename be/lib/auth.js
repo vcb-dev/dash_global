@@ -7,6 +7,47 @@ const ALLOWED = (ENV.ALLOWED_EMAILS || '')
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);
 
+/** AUTH_USERS=admin:pass|viewer:pass2 */
+function parseAuthUsers() {
+  return String(ENV.AUTH_USERS || '')
+    .split(/[|,]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((pair) => {
+      const i = pair.indexOf(':');
+      if (i <= 0) return null;
+      return {
+        username: pair.slice(0, i).trim(),
+        password: pair.slice(i + 1),
+      };
+    })
+    .filter((u) => u && u.username && u.password);
+}
+
+function passwordAuthEnabled() {
+  return parseAuthUsers().length > 0;
+}
+
+function safeEqualStr(a, b) {
+  const ba = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  if (ba.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ba, bb);
+}
+
+function verifyPasswordLogin(username, password) {
+  const users = parseAuthUsers();
+  const u = users.find((x) => safeEqualStr(x.username, String(username || '').trim()));
+  if (!u) return null;
+  if (!safeEqualStr(u.password, String(password || ''))) return null;
+  return {
+    email: u.username,
+    name: u.username,
+    picture: '',
+    username: u.username,
+  };
+}
+
 function b64url(buf) {
   return Buffer.from(buf)
     .toString('base64')
@@ -52,21 +93,35 @@ function getUser(req) {
   return verify(cookies.session);
 }
 
+function cookieSecure() {
+  // Cross-site FE (Vercel) → BE (Railway) needs SameSite=None; Secure
+  const fe = String(ENV.FE_ORIGIN || '');
+  return /https:\/\//i.test(fe) || ENV.COOKIE_SECURE === '1';
+}
+
+function sessionCookie(value, maxAge) {
+  const parts = [`session=${value}`, 'Path=/', 'HttpOnly', `Max-Age=${maxAge}`];
+  if (cookieSecure()) {
+    parts.push('SameSite=None', 'Secure');
+  } else {
+    parts.push('SameSite=Lax');
+  }
+  return parts.join('; ');
+}
+
 function setSession(res, user) {
   const token = sign({
-    email: user.email,
-    name: user.name,
-    picture: user.picture,
+    email: user.email || user.username,
+    name: user.name || user.username || user.email,
+    picture: user.picture || '',
+    username: user.username || user.email,
     exp: Date.now() + 7 * 24 * 3600 * 1000,
   });
-  res.setHeader(
-    'Set-Cookie',
-    `session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 3600}`
-  );
+  res.setHeader('Set-Cookie', sessionCookie(token, 7 * 24 * 3600));
 }
 
 function clearSession(res) {
-  res.setHeader('Set-Cookie', 'session=; Path=/; HttpOnly; Max-Age=0');
+  res.setHeader('Set-Cookie', sessionCookie('', 0));
 }
 
 function isAllowed(email) {
@@ -115,9 +170,15 @@ async function exchangeGoogleCode(code) {
   return { email: me.email, name: me.name || me.email, picture: me.picture || '' };
 }
 
-/** Dev login when Google not configured */
+/** Dev login when Google not configured and password auth off */
 function devLoginEnabled() {
+  if (passwordAuthEnabled()) return false;
   return ENV.ALLOW_DEV_LOGIN === '1' || !googleEnabled();
+}
+
+/** Require login for API when password users or Google is configured */
+function authRequired() {
+  return passwordAuthEnabled() || googleEnabled() || ENV.REQUIRE_AUTH === '1';
 }
 
 module.exports = {
@@ -130,4 +191,7 @@ module.exports = {
   exchangeGoogleCode,
   devLoginEnabled,
   parseCookies,
+  passwordAuthEnabled,
+  verifyPasswordLogin,
+  authRequired,
 };
