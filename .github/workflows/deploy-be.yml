@@ -55,6 +55,28 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: be/package-lock.json
+
+      - name: Migrate database
+        working-directory: be
+        env:
+          DATABASE_DIRECT: ${{ secrets.DATABASE_DIRECT }}
+          SUPABASE_DB_URL: ${{ secrets.DATABASE_DIRECT }}
+          DB_SCHEMA: global
+        run: |
+          set -euo pipefail
+          if [ -z "${DATABASE_DIRECT:-}" ]; then
+            echo "Missing secret DATABASE_DIRECT"
+            exit 1
+          fi
+          npm ci
+          npm run migrate
+
       - name: Sync DB URL + redeploy Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
