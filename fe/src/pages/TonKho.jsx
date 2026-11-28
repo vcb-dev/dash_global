@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
+import { useChartFilter } from '../lib/chartFilter';
 import { useApi } from '../lib/useApi';
 import { fmt } from '../lib/format';
 import { bar } from '../lib/charts';
@@ -8,6 +9,7 @@ import DataTable from '../components/DataTable';
 import Kpi from '../components/Kpi';
 
 function TonKho({ filters }) {
+  const applyChartFilter = useChartFilter();
   const { data, error, loading } = useApi('/api/ton-kho', filters);
 
   const pks = useMemo(() => (data ? [...new Set(data.matrix.map((r) => r.phan_khuc))] : []), [data]);
@@ -20,10 +22,14 @@ function TonKho({ filters }) {
         canvas,
         data.byKho.map((r) => r.kho.replace('KHO ', '')),
         data.byKho.map((r) => r.gt),
-        { horizontal: true, color: '#1d4ed8' }
+        {
+          horizontal: true,
+          color: '#1d4ed8',
+          onClick: (label) => applyChartFilter({ kho: label }),
+        }
       );
     },
-    [data]
+    [data, applyChartFilter]
   );
 
   if (error && !data) return <div className="error">{error}</div>;
@@ -91,8 +97,22 @@ function TonKho({ filters }) {
           </div>
         </div>
       </div>
+      {(data.tonXauByKho || []).length > 0 ? (
+        <div className="kpi-row">
+          {(data.tonXauByKho || []).map((r) => (
+            <Kpi
+              key={r.kho}
+              label={`Tồn xấu · ${String(r.kho || '').replace(/^KHO\s+/i, '')}`}
+              value={fmt.num(r.so_ma)}
+              sub={`SL ${fmt.num(r.sl)} · GT ${fmt.moneyFull(r.gt)}`}
+              tone="warn"
+            />
+          ))}
+        </div>
+      ) : null}
+
       <div className="card">
-        <h2>Chi tiết tồn xấu</h2>
+        <h2>Chi tiết tồn xấu (theo từng kho)</h2>
         <DataTable
           searchPlaceholder="Tìm SPU…"
           rows={data.tonXau}

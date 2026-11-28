@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-export default function DataTable({ columns, rows, searchPlaceholder = 'Tìm…', footer }) {
+export default function DataTable({ columns, rows, searchPlaceholder = 'Tìm…', footer, wrapClassName = '' }) {
   const [sort, setSort] = useState({ key: null, dir: 'desc' });
   const [q, setQ] = useState('');
   const searchCols = columns.filter((c) => c.search);
@@ -36,7 +36,7 @@ export default function DataTable({ columns, rows, searchPlaceholder = 'Tìm…'
   }
 
   return (
-    <div className="table-wrap">
+    <div className={`table-wrap ${wrapClassName}`.trim()}>
       <table className="data">
         <thead>
           <tr>

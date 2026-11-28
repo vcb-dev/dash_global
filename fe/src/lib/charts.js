@@ -29,6 +29,21 @@ export function destroyChart(canvas) {
   }
 }
 
+function bindChartClick(options, labels, opts = {}) {
+  if (!opts.onClick) return options;
+  options.onClick = (_evt, elements) => {
+    if (!elements?.length) return;
+    const i = elements[0].index;
+    opts.onClick(labels[i], i);
+  };
+  options.onHover = (evt, elements) => {
+    if (evt?.native?.target) {
+      evt.native.target.style.cursor = elements?.length ? 'pointer' : 'default';
+    }
+  };
+  return options;
+}
+
 function basePlugins(extra = {}) {
   return {
     legend: { display: false },
@@ -96,55 +111,59 @@ export function bar(canvas, labels, values, opts = {}) {
         },
       ],
     },
-      options: {
+    options: bindChartClick(
+      {
         animation: false,
         indexAxis: horizontal ? 'y' : 'x',
         responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: { top: 22, right: horizontal ? 56 : 8, left: horizontal ? 8 : 4, bottom: 4 } },
-      plugins: basePlugins({
-        datalabels: {
-          anchor: 'end',
-          align: horizontal ? 'end' : 'top',
-          offset: 4,
-          formatter: (v) => (opts.format === 'num' ? fmt.num(v) : moneyShort(v)),
-        },
-        tooltip: {
-          callbacks: {
-            title: (items) => labels[items[0]?.dataIndex ?? 0] ?? '',
-            label: (c) => (opts.format === 'num' ? fmt.num(c.raw) : moneyTip(c.raw)),
+        maintainAspectRatio: false,
+        layout: { padding: { top: 22, right: horizontal ? 56 : 8, left: horizontal ? 8 : 4, bottom: 4 } },
+        plugins: basePlugins({
+          datalabels: {
+            anchor: 'end',
+            align: horizontal ? 'end' : 'top',
+            offset: 4,
+            formatter: (v) => (opts.format === 'num' ? fmt.num(v) : moneyShort(v)),
           },
-        },
-      }),
-      scales: {
-        x: {
-          grid: { display: !horizontal, color: '#edf1f5', drawBorder: false },
-          ticks: {
-            color: '#5b6b7a',
-            font: { size: 11 },
-            maxRotation: 0,
-            ...(horizontal ? { callback: (v) => moneyShort(v) } : {}),
+          tooltip: {
+            callbacks: {
+              title: (items) => labels[items[0]?.dataIndex ?? 0] ?? '',
+              label: (c) => (opts.format === 'num' ? fmt.num(c.raw) : moneyTip(c.raw)),
+            },
           },
-          border: { display: false },
-        },
-        y: {
-          grid: { color: horizontal ? 'transparent' : '#edf1f5', drawBorder: false },
-          ticks: {
-            color: '#5b6b7a',
-            font: { size: 12, weight: horizontal ? '600' : '400' },
-            autoSkip: false,
-            ...(horizontal
-              ? { callback(_v, i) { return labels[i] ?? ''; } }
-              : { callback: (v) => moneyShort(v) }),
+        }),
+        scales: {
+          x: {
+            grid: { display: !horizontal, color: '#edf1f5', drawBorder: false },
+            ticks: {
+              color: '#5b6b7a',
+              font: { size: 11 },
+              maxRotation: 0,
+              ...(horizontal ? { callback: (v) => moneyShort(v) } : {}),
+            },
+            border: { display: false },
           },
-          border: { display: false },
+          y: {
+            grid: { color: horizontal ? 'transparent' : '#edf1f5', drawBorder: false },
+            ticks: {
+              color: '#5b6b7a',
+              font: { size: 12, weight: horizontal ? '600' : '400' },
+              autoSkip: false,
+              ...(horizontal
+                ? { callback(_v, i) { return labels[i] ?? ''; } }
+                : { callback: (v) => moneyShort(v) }),
+            },
+            border: { display: false },
+          },
         },
       },
-    },
+      labels,
+      opts
+    ),
   });
 }
 
-export function barLineShare(canvas, labels, values, sharePcts) {
+export function barLineShare(canvas, labels, values, sharePcts, opts = {}) {
   destroyChart(canvas);
   if (!canvas) return;
   const shares = (sharePcts || []).map((v) =>
@@ -202,60 +221,64 @@ export function barLineShare(canvas, labels, values, sharePcts) {
         },
       ],
     },
-    options: {
-      animation: false,
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      layout: { padding: { top: 36, right: 8, left: 4, bottom: 4 } },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          padding: 10,
-          cornerRadius: 8,
-          callbacks: {
-            label: (c) => {
-              if (c.dataset.yAxisID === 'yPct') {
-                if (c.raw == null) return 'Tỷ trọng: —';
-                return `Tỷ trọng: ${Number(c.raw).toFixed(1)}%`;
-              }
-              return `Doanh thu: ${moneyTip(c.raw)}`;
+    options: bindChartClick(
+      {
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        layout: { padding: { top: 36, right: 8, left: 4, bottom: 4 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            padding: 10,
+            cornerRadius: 8,
+            callbacks: {
+              label: (c) => {
+                if (c.dataset.yAxisID === 'yPct') {
+                  if (c.raw == null) return 'Tỷ trọng: —';
+                  return `Tỷ trọng: ${Number(c.raw).toFixed(1)}%`;
+                }
+                return `Doanh thu: ${moneyTip(c.raw)}`;
+              },
             },
           },
+          datalabels: {},
         },
-        datalabels: {},
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#5b6b7a', font: { size: 11, weight: '600' }, maxRotation: 0 },
-          border: { display: false },
-        },
-        y: {
-          type: 'linear',
-          position: 'left',
-          beginAtZero: true,
-          grace: '8%',
-          grid: { color: '#edf1f5' },
-          ticks: { color: '#5b6b7a', font: { size: 10 }, callback: (v) => moneyShort(v) },
-          border: { display: false },
-        },
-        yPct: {
-          type: 'linear',
-          position: 'right',
-          min: 0,
-          max: Math.min(100, Math.ceil((gMax + 8) / 5) * 5),
-          grid: { drawOnChartArea: false },
-          ticks: {
-            color: COLORS.growth,
-            font: { size: 10 },
-            callback: (v) => `${Number(v).toFixed(0)}%`,
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#5b6b7a', font: { size: 11, weight: '600' }, maxRotation: 0 },
+            border: { display: false },
           },
-          border: { display: false },
+          y: {
+            type: 'linear',
+            position: 'left',
+            beginAtZero: true,
+            grace: '8%',
+            grid: { color: '#edf1f5' },
+            ticks: { color: '#5b6b7a', font: { size: 10 }, callback: (v) => moneyShort(v) },
+            border: { display: false },
+          },
+          yPct: {
+            type: 'linear',
+            position: 'right',
+            min: 0,
+            max: Math.min(100, Math.ceil((gMax + 8) / 5) * 5),
+            grid: { drawOnChartArea: false },
+            ticks: {
+              color: COLORS.growth,
+              font: { size: 10 },
+              callback: (v) => `${Number(v).toFixed(0)}%`,
+            },
+            border: { display: false },
+          },
         },
       },
-    },
+      labels,
+      opts
+    ),
   });
 }
 
@@ -279,72 +302,240 @@ export function doughnut(canvas, labels, values, colors, opts = {}) {
         },
       ],
     },
-    options: {
-      animation: false,
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '58%',
-      layout: { padding: { top: 4, right: 4, bottom: 4, left: 4 } },
-      plugins: basePlugins({
-        legend: {
-          display: true,
-          position: 'right',
-          align: 'center',
-          labels: {
-            boxWidth: 8,
-            boxHeight: 8,
-            usePointStyle: true,
-            pointStyle: 'circle',
-            padding: 10,
-            font: { size: 10 },
-            generateLabels: (chart) => {
-              const ds = chart.data.datasets[0];
-              return chart.data.labels.map((label, i) => {
-                const text = opts.legendNamesOnly
-                  ? String(label)
-                  : `${label}  ${
-                      opts.format === 'num' ? fmt.num(ds.data[i]) : moneyShort(ds.data[i])
-                    } · ${((ds.data[i] / sumSafe) * 100).toFixed(1)}%`;
-                return {
-                  text,
-                  fillStyle: ds.backgroundColor[i],
-                  strokeStyle: ds.backgroundColor[i],
-                  hidden: false,
-                  index: i,
-                };
-              });
+    options: bindChartClick(
+      {
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '58%',
+        layout: { padding: { top: 4, right: 4, bottom: 4, left: 4 } },
+        plugins: basePlugins({
+          legend: {
+            display: true,
+            position: 'right',
+            align: 'center',
+            onClick: (_e, item) => {
+              if (!opts.onClick) return;
+              opts.onClick(labels[item.index], item.index);
+            },
+            labels: {
+              boxWidth: 8,
+              boxHeight: 8,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              padding: 10,
+              font: { size: 10 },
+              generateLabels: (chart) => {
+                const ds = chart.data.datasets[0];
+                return chart.data.labels.map((label, i) => {
+                  const text = opts.legendNamesOnly
+                    ? String(label)
+                    : `${label}  ${
+                        opts.format === 'num' ? fmt.num(ds.data[i]) : moneyShort(ds.data[i])
+                      } · ${((ds.data[i] / sumSafe) * 100).toFixed(1)}%`;
+                  return {
+                    text,
+                    fillStyle: ds.backgroundColor[i],
+                    strokeStyle: ds.backgroundColor[i],
+                    hidden: false,
+                    index: i,
+                  };
+                });
+              },
             },
           },
-        },
-        datalabels: {
-          color: '#fff',
-          font: { weight: '700', size: 10 },
-          formatter: (v) => {
-            const pct = (v / sumSafe) * 100;
-            if (pct < 8) return '';
-            const main = opts.format === 'num' ? fmt.num(v) : moneyShort(v);
-            return `${main}\n${pct.toFixed(0)}%`;
+          datalabels: {
+            color: '#fff',
+            font: { weight: '700', size: 10 },
+            formatter: (v) => {
+              const pct = (v / sumSafe) * 100;
+              if (pct < 8) return '';
+              const main = opts.format === 'num' ? fmt.num(v) : moneyShort(v);
+              return `${main}\n${pct.toFixed(0)}%`;
+            },
+            textAlign: 'center',
           },
-          textAlign: 'center',
-        },
-        tooltip: {
-          callbacks: {
-            label: (c) => {
-              const pct = ((c.raw / sumSafe) * 100).toFixed(1);
-              const val = opts.format === 'num' ? fmt.num(c.raw) : moneyTip(c.raw);
-              return `${c.label}: ${val} (${pct}%)`;
+          tooltip: {
+            callbacks: {
+              label: (c) => {
+                const pct = ((c.raw / sumSafe) * 100).toFixed(1);
+                const val = opts.format === 'num' ? fmt.num(c.raw) : moneyTip(c.raw);
+                return `${c.label}: ${val} (${pct}%)`;
+              },
             },
           },
-        },
-      }),
-    },
+        }),
+      },
+      labels,
+      opts
+    ),
     plugins: [donutCenterPlugin(centerMain, centerSub)],
   });
 }
 
-export function line(canvas, labels, values, benchmark) {
+/** Doanh thu theo ngày: kỳ dài → chỉ đỉnh/đáy (+ hover); kỳ ngắn mới gắn hết nhãn. */
+/** Multi-series line. series = [{ label, values, color }]. */
+export function multiLine(canvas, labels, series, opts = {}) {
   destroyChart(canvas);
   if (!canvas) return;
+  const n = (labels || []).length;
+  const dense = n > 14;
+  const datasets = (series || []).map((s, i) => {
+    const color = s.color || [COLORS.navy, COLORS.teal, COLORS.orange][i % 3];
+    return {
+      label: s.label || `Series ${i + 1}`,
+      data: s.values || [],
+      borderColor: color,
+      backgroundColor: 'transparent',
+      fill: false,
+      tension: 0.3,
+      pointRadius: dense ? 1.5 : 3,
+      pointHoverRadius: 5,
+      borderWidth: 2.2,
+      datalabels: { display: false },
+    };
+  });
+  canvas._chart = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets },
+    options: bindChartClick(
+      {
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        layout: { padding: { top: 16, right: 8, left: 4, bottom: 4 } },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: { boxWidth: 12, boxHeight: 12, font: { size: 11 }, color: '#475569' },
+          },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            padding: 10,
+            cornerRadius: 8,
+            callbacks: {
+              title: (items) => labels[items[0]?.dataIndex ?? 0] || '',
+              label: (c) => `${c.dataset.label}: ${moneyTip(c.raw)}`,
+            },
+          },
+          datalabels: { display: false },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#5b6b7a',
+              font: { size: 10 },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: dense ? 12 : 20,
+            },
+            border: { display: false },
+          },
+          y: {
+            grid: { color: '#edf1f5' },
+            ticks: { color: '#5b6b7a', font: { size: 10 }, callback: (v) => moneyShort(v) },
+            border: { display: false },
+          },
+        },
+      },
+      labels,
+      opts
+    ),
+  });
+}
+
+/** Funnel-style horizontal bars: values + optional grey drop overlay. */
+export function funnelBars(canvas, labels, values, drops, opts = {}) {
+  destroyChart(canvas);
+  if (!canvas) return;
+  const pcts = opts.pcts || [];
+  canvas._chart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Giữ',
+          data: values,
+          backgroundColor: COLORS.navy,
+          borderRadius: 8,
+          maxBarThickness: 42,
+          stack: 'f',
+        },
+        {
+          label: 'Rơi',
+          data: drops || labels.map(() => 0),
+          backgroundColor: '#cbd5e1',
+          borderRadius: 8,
+          maxBarThickness: 42,
+          stack: 'f',
+        },
+      ],
+    },
+    options: {
+      animation: false,
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 8, right: 72, left: 4, bottom: 4 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (c) => `${c.dataset.label}: ${moneyTip(c.raw)}`,
+            afterBody: (items) => {
+              const i = items[0]?.dataIndex ?? 0;
+              const p = pcts[i];
+              return p == null ? [] : [`${(Number(p) * 100).toFixed(1)}% so với tầng trên`];
+            },
+          },
+        },
+        datalabels: {
+          display: (ctx) => ctx.datasetIndex === 0,
+          anchor: 'end',
+          align: 'end',
+          offset: 4,
+          color: '#1e293b',
+          font: { weight: '700', size: 11 },
+          formatter: (v, ctx) => {
+            const p = pcts[ctx.dataIndex];
+            const money = moneyShort(v);
+            if (p == null || ctx.dataIndex === 0) return money;
+            return `${money} · ${(Number(p) * 100).toFixed(0)}%`;
+          },
+        },
+      },
+      scales: {
+        x: {
+          stacked: true,
+          grid: { color: '#edf1f5' },
+          ticks: { color: '#5b6b7a', callback: (v) => moneyShort(v) },
+          border: { display: false },
+        },
+        y: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { color: '#1e293b', font: { size: 12, weight: '600' } },
+          border: { display: false },
+        },
+      },
+    },
+  });
+}
+
+export function line(canvas, labels, values, benchmark, opts = {}) {
+  destroyChart(canvas);
+  if (!canvas) return;
+  const n = (values || []).length;
+  const dense = n > 14;
+  const nums = (values || []).map((v) => Number(v) || 0);
+  const maxV = nums.length ? Math.max(...nums) : 0;
+  const minV = nums.length ? Math.min(...nums) : 0;
+  const maxI = nums.indexOf(maxV);
+  const minI = nums.lastIndexOf(minV);
   const datasets = [
     {
       label: 'Doanh thu',
@@ -353,18 +544,23 @@ export function line(canvas, labels, values, benchmark) {
       backgroundColor: COLORS.soft,
       fill: true,
       tension: 0.3,
-      pointRadius: 3,
-      pointHoverRadius: 5,
+      pointRadius: dense ? 2 : 3,
+      pointHoverRadius: 6,
       pointBackgroundColor: COLORS.teal,
       borderWidth: 2.5,
       datalabels: {
-        display: true,
+        display(ctx) {
+          if (!dense) return true;
+          const i = ctx.dataIndex;
+          return i === maxI || i === minI;
+        },
         align: 'top',
         anchor: 'end',
-        offset: 2,
+        offset: 4,
         color: '#0f766e',
-        font: { weight: '700', size: 10 },
+        font: { weight: '700', size: dense ? 11 : 10 },
         formatter: (v) => moneyShort(v),
+        clamp: true,
       },
     },
   ];
@@ -384,37 +580,47 @@ export function line(canvas, labels, values, benchmark) {
   canvas._chart = new Chart(canvas, {
     type: 'line',
     data: { labels, datasets },
-    options: {
-      animation: false,
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      layout: { padding: { top: 22, right: 8, left: 4, bottom: 4 } },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          padding: 10,
-          cornerRadius: 8,
-          callbacks: {
-            title: (items) => labels[items[0]?.dataIndex ?? 0] || '',
-            label: (c) => `${c.dataset.label}: ${moneyTip(c.raw)}`,
+    options: bindChartClick(
+      {
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        layout: { padding: { top: dense ? 28 : 22, right: 8, left: 4, bottom: 4 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            padding: 10,
+            cornerRadius: 8,
+            callbacks: {
+              title: (items) => labels[items[0]?.dataIndex ?? 0] || '',
+              label: (c) => `${c.dataset.label}: ${moneyTip(c.raw)}`,
+            },
+          },
+          datalabels: {},
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#5b6b7a',
+              font: { size: 10 },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: dense ? 12 : 20,
+            },
+            border: { display: false },
+          },
+          y: {
+            grid: { color: '#edf1f5' },
+            ticks: { color: '#5b6b7a', font: { size: 10 }, callback: (v) => moneyShort(v) },
+            border: { display: false },
           },
         },
-        datalabels: {},
       },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#5b6b7a', font: { size: 10 }, maxRotation: 0 },
-          border: { display: false },
-        },
-        y: {
-          grid: { color: '#edf1f5' },
-          ticks: { color: '#5b6b7a', font: { size: 10 }, callback: (v) => moneyShort(v) },
-          border: { display: false },
-        },
-      },
-    },
+      labels,
+      opts
+    ),
   });
 }

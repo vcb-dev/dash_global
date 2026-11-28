@@ -28,7 +28,11 @@ const pool = new Pool({
   max: Number(ENV.DB_POOL_MAX || 8),
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 8_000,
-  options: '-c statement_timeout=20000',
+  options: '-c statement_timeout=60000',
+});
+
+pool.on('error', (err) => {
+  console.error('Postgres pool idle client error:', err.message);
 });
 
 function dbQuery(sql, params) {
@@ -44,9 +48,13 @@ async function withDb(fn) {
   }
 }
 
+/** Mốc đồng bộ DT / tồn / POS trên dashboard (≥ ngày này). */
+const SYNC_RANGE_MIN = '2026-09-01';
+
 function parseRange(q) {
-  const from = q.from || '2026-10-01';
-  const to = q.to || '2026-11-20';
+  let from = q.from || SYNC_RANGE_MIN;
+  if (from < SYNC_RANGE_MIN) from = SYNC_RANGE_MIN;
+  const to = q.to || '2026-11-26';
   return { from, to };
 }
 
@@ -55,4 +63,4 @@ function khoFilter(q, alias = 'f') {
   return { sql: ` AND ${alias}.kho = $K`, params: [q.kho], key: 'kho' };
 }
 
-module.exports = { ENV, SCHEMA, fq, pool, dbQuery, withDb, parseRange, khoFilter };
+module.exports = { ENV, SCHEMA, fq, pool, dbQuery, withDb, parseRange, khoFilter, SYNC_RANGE_MIN };

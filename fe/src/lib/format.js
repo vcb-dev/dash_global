@@ -29,6 +29,14 @@ export const fmt = {
     if (n == null || Number.isNaN(Number(n))) return '—';
     return Number(n).toLocaleString('vi-VN', { maximumFractionDigits: 0 });
   },
+  /** Giá trị TB/đơn dạng "3,939 triệu" */
+  trieu(n) {
+    if (n == null || Number.isNaN(Number(n))) return '—';
+    return `${(Number(n) / 1e6).toLocaleString('vi-VN', {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+    })} triệu`;
+  },
   pct(n) {
     if (n == null || Number.isNaN(Number(n))) return '—';
     return `${(Number(n) * 100).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}%`;

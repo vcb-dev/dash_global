@@ -1,4 +1,5 @@
 import { memo, useCallback } from 'react';
+import { useChartFilter } from '../lib/chartFilter';
 import { useApi } from '../lib/useApi';
 import { fmt } from '../lib/format';
 import { bar, doughnut } from '../lib/charts';
@@ -13,6 +14,7 @@ function etaClass(flag) {
 }
 
 function HangDangVe({ filters }) {
+  const applyChartFilter = useChartFilter();
   const { data, error, loading } = useApi('/api/hang-dang-ve', filters);
 
   const drawEta = useCallback(
@@ -22,9 +24,10 @@ function HangDangVe({ filters }) {
       doughnut(canvas, ['Quá hạn', 'Sắp đến hạn', 'Còn hạn'], [k.qua_han, k.sap_han, k.con_han], ['#dc2626', '#ea580c', '#16a34a'], {
         format: 'num',
         legendNamesOnly: true,
+        onClick: (label) => applyChartFilter({ flag_eta: label }),
       });
     },
-    [data]
+    [data, applyChartFilter]
   );
   const drawSpu = useCallback(
     (canvas) => {
@@ -33,10 +36,15 @@ function HangDangVe({ filters }) {
         canvas,
         data.bySpu.map((r) => r.spu_key),
         data.bySpu.map((r) => r.sl),
-        { horizontal: true, color: '#0f766e', format: 'num' }
+        {
+          horizontal: true,
+          color: '#0f766e',
+          format: 'num',
+          onClick: (label) => applyChartFilter({ spu: label }),
+        }
       );
     },
-    [data]
+    [data, applyChartFilter]
   );
 
   if (error && !data) return <div className="error">{error}</div>;

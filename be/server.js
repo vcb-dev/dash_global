@@ -66,7 +66,20 @@ const API_CACHE = new Map();
 const API_CACHE_TTL = 20_000;
 
 function apiCacheKey(pathname, query) {
-  return `${pathname}|${query.from || ''}|${query.to || ''}|${query.kho || ''}|${query.phan_khuc || ''}|${query.phan_nhom || ''}|${query.key || ''}`;
+  return [
+    pathname,
+    query.from || '',
+    query.to || '',
+    query.kho || '',
+    query.phan_khuc || '',
+    query.phan_nhom || '',
+    query.ma_cu_moi || '',
+    query.spu || '',
+    query.ngay_snapshot || '',
+    query.trang_thai_day || '',
+    query.flag_eta || '',
+    query.key || '',
+  ].join('|');
 }
 
 async function cachedJson(pathname, query, fn) {
@@ -101,6 +114,9 @@ async function handleApi(req, res, pathname, query) {
     '/api/ton-kho': () => queries.tonKho(query),
     '/api/hang-dang-ve': () => queries.hangDangVe(query),
     '/api/hanh-dong': () => queries.hanhDong(query),
+    '/api/phan-tich-dt': () => queries.phanTichDoanhThu(query),
+    '/api/day-ton-xau': () => queries.dayTonXau(query),
+    '/api/pheu-doanh-thu': () => queries.pheoDoanhThu(query),
     '/api/spu-check': () => queries.spuCheck(query),
     '/api/filters': () => queries.filterOptions(),
   };

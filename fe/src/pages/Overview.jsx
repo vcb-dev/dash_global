@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { useChartFilter } from '../lib/chartFilter';
 import { useApi } from '../lib/useApi';
 import { fmt } from '../lib/format';
 import { bar, doughnut, line } from '../lib/charts';
@@ -9,6 +10,7 @@ import DataTable from '../components/DataTable';
 import Kpi from '../components/Kpi';
 
 function Overview({ filters }) {
+  const applyChartFilter = useChartFilter();
   const { data, error, loading } = useApi('/api/overview', filters);
   const [lookup, setLookup] = useState('');
   const [lookupHtml, setLookupHtml] = useState(null);
@@ -60,10 +62,16 @@ function Overview({ filters }) {
         canvas,
         data.byKho.map((r) => r.kho.replace('KHO ', '')),
         data.byKho.map((r) => r.dt),
-        { horizontal: true, color: '#252e80', thick: true, maxBarThickness: 56 }
+        {
+          horizontal: true,
+          color: '#252e80',
+          thick: true,
+          maxBarThickness: 56,
+          onClick: (label) => applyChartFilter({ kho: label }),
+        }
       );
     },
-    [data]
+    [data, applyChartFilter]
   );
   const drawMa = useCallback(
     (canvas) => {
@@ -73,22 +81,27 @@ function Overview({ filters }) {
         data.byMa.map((r) => r.ma_cu_moi),
         data.byMa.map((r) => r.dt),
         ['#1e3a8a', '#0f766e', '#64748b'],
-        { legendNamesOnly: true }
+        {
+          legendNamesOnly: true,
+          onClick: (label) => applyChartFilter({ ma_cu_moi: label }),
+        }
       );
     },
-    [data]
+    [data, applyChartFilter]
   );
   const drawDay = useCallback(
     (canvas) => {
       if (!data) return;
+      const dayKeys = data.daily.map((r) => r.ngay);
       line(
         canvas,
         data.daily.map((r) => r.ngay.slice(8) + '/' + r.ngay.slice(5, 7)),
         data.daily.map((r) => r.dt),
-        data.kpi.benchmark
+        data.kpi.benchmark,
+        { onClick: (_label, i) => applyChartFilter({ day: dayKeys[i] }) }
       );
     },
-    [data]
+    [data, applyChartFilter]
   );
 
   if (error && !data) return <div className="error">{error}</div>;
@@ -98,13 +111,13 @@ function Overview({ filters }) {
   const m = data.spuMeta || {};
 
   return (
-    <div className={loading ? 'is-loading' : ''}>
-      <div className="kpi-row">
+    <div className={`page-stack${loading ? ' is-loading' : ''}`}>
+      <div className="kpi-row kpi-row-8">
         <Kpi label="Tổng SPU" value={fmt.num(k.so_spu)} />
         <Kpi label="Doanh thu" value={fmt.money(k.dt)} />
         <Kpi label="Đơn chốt" value={fmt.num(k.don)} />
         <Kpi label="Số lượng bán" value={fmt.num(k.sl)} />
-        <Kpi label="Giá trị TB/đơn" value={fmt.moneyFull(k.tb_don)} />
+        <Kpi label="Giá trị TB/đơn" value={fmt.trieu(k.tb_don)} />
         <Kpi label="DT mã trung gian" value={fmt.money(k.dt_trung_gian)} tone="warn" />
         <Kpi label="SL quá hạn" value={fmt.num(k.sl_qua_han)} tone="danger" />
         <Kpi label="Hàng đang về" value={fmt.num(k.hang_dang_ve)} tone="ok" />
@@ -123,71 +136,107 @@ function Overview({ filters }) {
           <ChartCanvas draw={drawDay} tall />
         </div>
       </div>
-      <div className="card">
-        <h2>Chi tiết theo kho</h2>
-        <DataTable
-          rows={data.byKho}
-          columns={[
-            { key: 'kho', label: 'Kho' },
-            { key: 'dt', label: 'Doanh thu', className: 'num', sort: true, sortValue: (r) => r.dt, render: (r) => fmt.moneyFull(r.dt) },
-            { key: 'don', label: 'Đơn', className: 'num', sort: true, sortValue: (r) => r.don, render: (r) => fmt.num(r.don) },
-            { key: 'sl', label: 'SL', className: 'num', sort: true, sortValue: (r) => r.sl, render: (r) => fmt.num(r.sl) },
-            { key: 'tb_don', label: 'TB/đơn', className: 'num', sort: true, sortValue: (r) => r.tb_don, render: (r) => fmt.moneyFull(r.tb_don) },
-          ]}
-        />
+      <div className="grid-2 overview-tables">
+        <div className="card">
+          <h2>Chi tiết theo kho</h2>
+          <DataTable
+            rows={data.byKho}
+            columns={[
+              { key: 'kho', label: 'Kho' },
+              {
+                key: 'dt',
+                label: 'Doanh thu',
+                className: 'num',
+                sort: true,
+                sortValue: (r) => r.dt,
+                render: (r) => fmt.moneyFull(r.dt),
+              },
+              {
+                key: 'don',
+                label: 'Đơn',
+                className: 'num',
+                sort: true,
+                sortValue: (r) => r.don,
+                render: (r) => fmt.num(r.don),
+              },
+              {
+                key: 'sl',
+                label: 'SL',
+                className: 'num',
+                sort: true,
+                sortValue: (r) => r.sl,
+                render: (r) => fmt.num(r.sl),
+              },
+              {
+                key: 'tb_don',
+                label: 'TB/đơn',
+                className: 'num',
+                sort: true,
+                sortValue: (r) => r.tb_don,
+                render: (r) => fmt.moneyFull(r.tb_don),
+              },
+            ]}
+          />
+        </div>
+        <div className="card">
+          <h2>Tổng SPU — đang giữ / đang bỏ</h2>
+          <div className="spu-lookup">
+            <label className="muted">Tra mã</label>
+            <input
+              type="text"
+              placeholder="C500391"
+              value={lookup}
+              onChange={(e) => setLookup(e.target.value)}
+            />
+            <span className="muted">{lookupHtml}</span>
+          </div>
+          <h3 className="spu-panel-title">Theo phân khúc</h3>
+          <DataTable
+            rows={m.byPk || []}
+            columns={[
+              { key: 'phan_khuc', label: 'Phân khúc', render: (r) => <BadgePk pk={r.phan_khuc} /> },
+              { key: 'so_ma', label: 'Số mã', className: 'num', render: (r) => fmt.num(r.so_ma) },
+            ]}
+          />
+        </div>
       </div>
       <div className="card">
-        <h2>Tổng SPU — đang giữ / đang bỏ</h2>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, flexWrap: 'wrap' }}>
-          <label className="muted">Tra mã</label>
-          <input
-            type="text"
-            placeholder="C500391"
-            value={lookup}
-            onChange={(e) => setLookup(e.target.value)}
-            style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: 6, minWidth: 160 }}
-          />
-          <span className="muted">{lookupHtml}</span>
-        </div>
-        <div className="grid-2">
-          <div>
-            <h3 style={{ margin: '0 0 8px', fontSize: 14 }}>Theo phân khúc</h3>
-            <DataTable
-              rows={m.byPk || []}
-              columns={[
-                { key: 'phan_khuc', label: 'Phân khúc', render: (r) => <BadgePk pk={r.phan_khuc} /> },
-                { key: 'so_ma', label: 'Số mã', className: 'num', render: (r) => fmt.num(r.so_ma) },
-              ]}
-            />
-          </div>
-          <div>
-            <h3 style={{ margin: '0 0 8px', fontSize: 14 }}>Danh sách đang bỏ ({fmt.num((m.bo || []).length)})</h3>
-            <DataTable
-              rows={m.bo || []}
-              columns={[
-                {
-                  key: 'spu_key',
-                  label: 'SPU',
-                  render: (r) => (
+        <h2>Danh sách đang bỏ ({fmt.num((m.bo || []).length)})</h2>
+        <DataTable
+          rows={m.bo || []}
+          columns={[
+            {
+              key: 'spu_key',
+              label: 'SPU',
+              render: (r) => (
+                <>
+                  {r.spu_key}
+                  {r.bo_thu_cong ? (
                     <>
-                      {r.spu_key}
-                      {r.bo_thu_cong ? (
-                        <>
-                          {' '}
-                          <span className="tag-danger">thủ công</span>
-                        </>
-                      ) : null}
+                      {' '}
+                      <span className="tag-danger">thủ công</span>
                     </>
-                  ),
-                },
-                { key: 'ten_san_pham', label: 'Tên' },
-                { key: 'loai_ma', label: 'Loại mã' },
-                { key: 'phan_khuc', label: 'Phân khúc', render: (r) => <BadgePk pk={r.phan_khuc} /> },
-                { key: 'dt', label: 'Doanh số', className: 'num', sort: true, sortValue: (r) => r.dt, render: (r) => fmt.moneyFull(r.dt) },
-              ]}
-            />
-          </div>
-        </div>
+                  ) : null}
+                </>
+              ),
+            },
+            { key: 'ten_san_pham', label: 'Tên' },
+            { key: 'loai_ma', label: 'Loại mã' },
+            {
+              key: 'phan_khuc',
+              label: 'Phân khúc',
+              render: (r) => <BadgePk pk={r.phan_khuc} />,
+            },
+            {
+              key: 'dt',
+              label: 'Doanh số',
+              className: 'num',
+              sort: true,
+              sortValue: (r) => r.dt,
+              render: (r) => fmt.moneyFull(r.dt),
+            },
+          ]}
+        />
       </div>
     </div>
   );

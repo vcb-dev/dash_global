@@ -6,7 +6,19 @@ export function apiOrigin() {
 }
 
 export function filtersKey(filters = {}) {
-  return [filters.from, filters.to, filters.kho, filters.phan_khuc, filters.phan_nhom].join('|');
+  return [
+    filters.from,
+    filters.to,
+    filters.kho,
+    filters.phan_khuc,
+    filters.phan_nhom,
+    filters.ma_cu_moi,
+    filters.spu,
+    filters.ngay_snapshot,
+    filters.trang_thai_day,
+    filters.flag_eta,
+    filters.trang_thai,
+  ].join('|');
 }
 
 export async function getJson(path, opts = {}) {
@@ -27,6 +39,22 @@ export async function api(path, filters = {}, opts = {}) {
   if (filters.kho && filters.kho !== 'All') u.searchParams.set('kho', filters.kho);
   if (filters.phan_khuc && filters.phan_khuc !== 'All') u.searchParams.set('phan_khuc', filters.phan_khuc);
   if (filters.phan_nhom && filters.phan_nhom !== 'All') u.searchParams.set('phan_nhom', filters.phan_nhom);
+  if (filters.ma_cu_moi && filters.ma_cu_moi !== 'All') u.searchParams.set('ma_cu_moi', filters.ma_cu_moi);
+  if (filters.spu && filters.spu !== 'All') u.searchParams.set('spu', filters.spu);
+  if (filters.ngay_snapshot) u.searchParams.set('ngay_snapshot', filters.ngay_snapshot);
+  if (filters.trang_thai_day && filters.trang_thai_day !== 'All') {
+    u.searchParams.set('trang_thai_day', filters.trang_thai_day);
+  }
+  if (filters.flag_eta && filters.flag_eta !== 'All') u.searchParams.set('flag_eta', filters.flag_eta);
+  if (filters.trang_thai && filters.trang_thai !== 'All') u.searchParams.set('trang_thai', filters.trang_thai);
+
+  // Allow path already containing query (e.g. /api/spu-check?key=)
+  if (path.includes('?')) {
+    const [base, qs] = path.split('?');
+    u.pathname = new URL(base, apiOrigin() + '/').pathname;
+    new URLSearchParams(qs).forEach((v, k) => u.searchParams.set(k, v));
+  }
+
   const key = u.toString();
   if (!opts.skipCache && memory.has(key)) return memory.get(key);
   const res = await fetch(key, { credentials: 'include', signal: opts.signal });

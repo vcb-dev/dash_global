@@ -1,4 +1,5 @@
 import { memo, useCallback } from 'react';
+import { useChartFilter } from '../lib/chartFilter';
 import { useApi } from '../lib/useApi';
 import { fmt } from '../lib/format';
 import { barLineShare, doughnut } from '../lib/charts';
@@ -8,6 +9,7 @@ import DataTable from '../components/DataTable';
 import Kpi from '../components/Kpi';
 
 function SanPham({ filters }) {
+  const applyChartFilter = useChartFilter();
   const { data, error, loading } = useApi('/api/san-pham', filters);
 
   const drawPk = useCallback(
@@ -17,11 +19,14 @@ function SanPham({ filters }) {
         canvas,
         data.byPk.map((r) => r.phan_khuc),
         data.byPk.map((r) => r.dt),
-        ['#2563eb', '#16a34a', '#ea580c'],
-        { legendNamesOnly: true }
+        ['#2563eb', '#16a34a', '#ea580c', '#7c3aed', '#dc2626', '#0f766e', '#64748b'],
+        {
+          legendNamesOnly: true,
+          onClick: (label) => applyChartFilter({ phan_khuc: label }),
+        }
       );
     },
-    [data]
+    [data, applyChartFilter]
   );
   const drawNhom = useCallback(
     (canvas) => {
@@ -30,10 +35,11 @@ function SanPham({ filters }) {
         canvas,
         data.byNhom.map((r) => r.nhom),
         data.byNhom.map((r) => r.dt),
-        data.byNhom.map((r) => r.ty_trong_pct)
+        data.byNhom.map((r) => r.ty_trong_pct),
+        { onClick: (label) => applyChartFilter({ phan_nhom: label }) }
       );
     },
-    [data]
+    [data, applyChartFilter]
   );
 
   if (error && !data) return <div className="error">{error}</div>;

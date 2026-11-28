@@ -1,0 +1,14 @@
+---
+description: Mỗi lần làm việc phải đọc lại AGENTS.md + MD kiến thức liên quan
+alwaysApply: true
+---
+
+# Đọc lại MD mỗi lần — không nhớ suông
+
+Trước mọi thay đổi code / script trong Global_VCB:
+
+1. **Read `AGENTS.md`** (gốc repo) — bắt buộc mỗi lượt việc mới.
+2. Việc dash / sync / BE / layout / Sapo → **Read `Global.md`** (hoặc skill `global-vcb-pancake`).
+3. Việc script / sync / check / seed / CSV map → **Read `scripts/README.md`**.
+4. Không bỏ qua vì “đã đọc phiên trước”. Không tạo `.js`/`.csv` lẻ ở root.
+5. Kiến thức mới phát hiện khi làm → ghi vào MD tương ứng trước khi kết thúc việc.

@@ -1,0 +1,13 @@
+---
+description: Không rải script/CSV ra root — mọi thứ vào scripts/
+alwaysApply: true
+---
+
+# Thư mục scripts/
+
+- Mỗi lần đụng script/sync/CSV: **Read `scripts/README.md`** lại (cùng `AGENTS.md`).
+- File one-off, sync, check, seed, probe, ops, map SPU (`.js` / `.ps1` / `.csv` / `.json` map) → **`scripts/`** only.
+- **Cấm** tạo các file đó ở root repo. Root chỉ: `fe/`, `be/`, docs, `package.json`, compose, `run_draft.js`, `pancake_export.ps1`.
+- Thêm script mới: đặt đúng chỗ + thêm 1 dòng catalog vào `scripts/README.md`.
+- Sync: `node scripts/sync_dt_ton.js`, `node scripts/sync_orders_funnel.js`.
+- Env: `../be/.env`. Map CSV: cùng folder `scripts/`.

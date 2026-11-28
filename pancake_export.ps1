@@ -14,7 +14,8 @@
 param(
     [datetime]$StartDate = (Get-Date -Day 1).Date,
     [datetime]$EndDate = (Get-Date).Date,
-    [string[]]$Warehouses = @('KHO THÁI LAN', 'KHO NHẬT BẢN'),
+    # POS: Nhật = KHO NHẬT BẢN CÓ VAT (chuẩn hóa thành KHO NHẬT BẢN). Không lấy KHÔNG VAT.
+    [string[]]$Warehouses = @('KHO THÁI LAN', 'KHO NHẬT BẢN CÓ VAT'),
     [int]$NewCodeDays = 90,
     [switch]$SkipDb,
     [string]$OutDir = (Join-Path $PSScriptRoot 'output')
@@ -52,7 +53,7 @@ function Get-Size($variation) {
 }
 
 # Mapping tay (spu_goc → spu_key) được ưu tiên trước quy tắc tự động
-$mapFile = Join-Path $PSScriptRoot 'spu_mapping.csv'
+$mapFile = Join-Path $PSScriptRoot 'scripts\spu_mapping.csv'
 $manualMap = @{}
 if (Test-Path $mapFile) {
     Import-Csv $mapFile | Where-Object { $_.spu_goc } | ForEach-Object { $manualMap[$_.spu_goc.Trim().ToUpper()] = $_.spu_key.Trim().ToUpper() }
@@ -338,7 +339,7 @@ Write-Host "Xong. File trong: $OutDir"
 $node = Join-Path $PSScriptRoot 'tools\node\node.exe'
 if (-not $SkipDb -and $cfg['SUPABASE_DB_URL'] -and (Test-Path $node)) {
     Write-Host 'Nạp lên Supabase...'
-    & $node (Join-Path $PSScriptRoot 'load_supabase.js') $OutDir
+    & $node (Join-Path $PSScriptRoot 'scripts\load_supabase.js') $OutDir
     if ($LASTEXITCODE -ne 0) { throw 'Nạp Supabase thất bại' }
 }
 
